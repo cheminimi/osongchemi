@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급화학 팀 탐구 · 도구 모음</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --paper:#f5f5f7;--paper-2:#ffffff;--ink:#1d1d1f;--ink-2:#424245;--ink-3:#86868b;
+  --rule:#e8e8ed;--tint:#0071e3;--ok:#1d8a4e;
+  --shadow:0 4px 20px rgba(0,0,0,0.06);--shadow-lg:0 12px 40px rgba(0,0,0,0.12);
+  --r:20px;--r-sm:13px;
+  --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard Variable",Pretendard,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5;letter-spacing:-0.01em}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+.toolbar{position:sticky;top:0;z-index:50;background:rgba(245,245,247,.8);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--rule)}
+.tb-in{display:flex;align-items:center;justify-content:space-between;height:54px;gap:14px}
+.tb-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;text-decoration:none;color:var(--ink)}
+.tb-logo svg{color:var(--tint)}
+.tb-links{display:flex;gap:4px}
+.tb-links a{font-size:13.5px;color:var(--ink-2);text-decoration:none;padding:7px 14px;border-radius:980px;transition:.16s;white-space:nowrap}
+.tb-links a:hover{background:#e8e8ed;color:var(--ink)}
+.tb-links a.here{background:var(--ink);color:#fff}
+@media(max-width:720px){.tb-links a{padding:7px 10px;font-size:12.5px}.tb-logo span{display:none}}
+
+.hero{padding:76px 0 54px;text-align:center}
+.hero .ey{font-size:14px;color:var(--tint);font-weight:600;margin-bottom:14px}
+.hero h1{font-size:52px;font-weight:700;letter-spacing:-0.035em;line-height:1.08;margin-bottom:20px}
+.hero p{font-size:19px;color:var(--ink-2);line-height:1.6;max-width:600px;margin:0 auto}
+@media(max-width:640px){.hero h1{font-size:34px}.hero p{font-size:16px}}
+
+.flow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:34px 0 10px}
+.fchip{background:var(--paper-2);border-radius:980px;padding:8px 16px;font-size:12.5px;color:var(--ink-2);box-shadow:var(--shadow)}
+.fchip b{color:var(--ink);font-weight:600}
+.farrow{color:var(--ink-3);align-self:center;font-size:13px}
+
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:20px 0}
+@media(max-width:820px){.tools{grid-template-columns:1fr}}
+.tool{background:var(--paper-2);border-radius:var(--r);padding:30px;text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;box-shadow:var(--shadow);transition:transform .25s ease,box-shadow .25s ease;position:relative;overflow:hidden}
+.tool:hover{transform:translateY(-5px);box-shadow:var(--shadow-lg)}
+.tool.dark{background:#000;color:#f5f5f7}
+.tool .day{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--tint);letter-spacing:.02em;margin-bottom:12px}
+.tool.dark .day{color:#0a84ff}
+.tool .ic{width:46px;height:46px;border-radius:13px;background:color-mix(in srgb,var(--tint) 10%,white);
+  display:grid;place-items:center;color:var(--tint);margin-bottom:18px}
+.tool.dark .ic{background:rgba(10,132,255,.16);color:#0a84ff}
+.tool h2{font-size:25px;font-weight:700;letter-spacing:-0.025em;margin-bottom:9px}
+.tool p{font-size:15px;color:var(--ink-2);line-height:1.6;margin-bottom:18px;flex:1}
+.tool.dark p{color:#aeaeb2}
+.tool .go{display:inline-flex;align-items:center;gap:6px;font-size:14.5px;font-weight:500;color:var(--tint)}
+.tool.dark .go{color:#0a84ff}
+.tool .feats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.feat{font-size:11.5px;background:#f0f0f2;color:var(--ink-3);padding:4px 11px;border-radius:980px}
+.tool.dark .feat{background:#1c1c1e;color:#8e8e93}
+
+.trow{background:var(--paper-2);border-radius:var(--r);padding:26px 30px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:22px;text-decoration:none;color:inherit;transition:.25s;margin-bottom:18px}
+.trow:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+.trow .ic{width:46px;height:46px;border-radius:13px;background:#f0f0f2;display:grid;place-items:center;color:var(--ink-2);flex:none}
+.trow .txt{flex:1}
+.trow h3{font-size:19px;font-weight:600;letter-spacing:-0.02em;margin-bottom:4px}
+.trow p{font-size:14px;color:var(--ink-2);line-height:1.55}
+.trow .go{color:var(--tint);font-size:14.5px;font-weight:500;white-space:nowrap}
+@media(max-width:640px){.trow{flex-direction:column;align-items:flex-start;gap:14px}}
+
+.docs{background:var(--paper-2);border-radius:var(--r);padding:28px 30px;box-shadow:var(--shadow);margin-bottom:60px}
+.docs h3{font-size:17px;font-weight:600;margin-bottom:6px;letter-spacing:-0.02em}
+.docs>p{font-size:14px;color:var(--ink-2);margin-bottom:18px}
+.dlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.ditem{background:#f5f5f7;border-radius:var(--r-sm);padding:14px 16px}
+.ditem b{display:block;font-size:14px;font-weight:600;margin-bottom:3px}
+.ditem span{font-size:12.5px;color:var(--ink-3);line-height:1.5}
+
+.sec-lbl{font-size:13px;color:var(--ink-3);font-weight:600;margin:30px 0 2px;letter-spacing:0}
+footer{border-top:1px solid var(--rule);padding:26px 0 50px}
+footer p{font-family:var(--mono);font-size:11px;color:var(--ink-3);line-height:1.8}
+:focus-visible{outline:2.5px solid var(--tint);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+
+<main class="wrap">
+
+<section class="hero">
+  <p class="ey">고급화학 · 8일 블록 팀 탐구</p>
+  <h1>화학 1·2가 멈추는<br>지점에서 시작합니다</h1>
+  <p>현상을 만나고, 질문을 좁히고, 직접 재고, 정직하게 기록합니다. 네 개의 도구가 8일의 흐름을 따라 이어집니다.</p>
+  <div class="flow">
+    <span class="fchip"><b>Day 1</b> 현상 관찰</span><span class="farrow">→</span>
+    <span class="fchip"><b>Day 2</b> 질문 설계</span><span class="farrow">→</span>
+    <span class="fchip"><b>Day 3</b> 예비실험</span><span class="farrow">→</span>
+    <span class="fchip"><b>Day 4–7</b> 측정·검증</span><span class="farrow">→</span>
+    <span class="fchip"><b>Day 8</b> 리포트</span>
+  </div>
+</section>
+
+<p class="sec-lbl">학생용 도구</p>
+<section class="tools">
+
+  <a href="sim.html" class="tool dark">
+    <p class="day">DAY 1 · 현상 관찰</p>
+    <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></div>
+    <h2>결정장 시뮬레이터</h2>
+    <p>금속과 리간드를 바꾸면 d 오비탈 분리, 색, 홀전자 수가 즉시 계산됩니다. 같은 Fe²⁺가 리간드에 따라 상자성과 반자성으로 갈리는 것을 직접 확인하세요.</p>
+    <div class="feats"><span class="feat">d 오비탈 다이어그램</span><span class="feat">흡수 스펙트럼</span><span class="feat">van't Hoff</span></div>
+    <span class="go">시뮬레이터 열기 →</span>
+  </a>
+
+  <a href="design.html" class="tool">
+    <p class="day">DAY 1–2 · 질문 설계</p>
+    <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></div>
+    <h2>탐구 설계실</h2>
+    <p>12개 주제 중 하나를 고르고, 분화 3축으로 질문을 좁혀 우리 팀만의 메타 질문을 만듭니다. 통과 조건을 모두 채우면 설계 카드가 나옵니다.</p>
+    <div class="feats"><span class="feat">12개 주제</span><span class="feat">분화 3축</span><span class="feat">설계 코드</span></div>
+    <span class="go">설계 시작하기 →</span>
+  </a>
+
+  <a href="lab.html" class="tool">
+    <p class="day">DAY 3–8 · 기록</p>
+    <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <h2>실험 기록장</h2>
+    <p>매일 다섯 칸을 채우고, 데이터가 질문을 어떻게 바꿨는지 v1→v2→v3로 남깁니다. 망한 것을 적는 칸이 가장 중요합니다.</p>
+    <div class="feats"><span class="feat">랩노트</span><span class="feat">질문 개정 이력</span><span class="feat">파일 제출</span></div>
+    <span class="go">기록 시작하기 →</span>
+  </a>
+
+  <a href="sim.html#teams" class="tool" style="background:linear-gradient(140deg,#ffffff 0%,#eef3fb 100%)">
+    <p class="day">막혔을 때</p>
+    <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01"/></svg></div>
+    <h2>어디로 가야 할지 모르겠다면</h2>
+    <p>질문이 안 떠오르면 시뮬레이터로 돌아가 현상을 다시 보세요. 측정이 막히면 설계실의 <b>실험 다지기</b>에서 이 주제가 어디서 깨지는지 확인할 수 있습니다.</p>
+    <div class="feats"><span class="feat">12주제 한눈에</span><span class="feat">난이도</span><span class="feat">교차검증</span></div>
+    <span class="go">주제 둘러보기 →</span>
+  </a>
+
+</section>
+
+<p class="sec-lbl">교사용</p>
+<a href="teacher.html" class="trow" style="margin-top:14px">
+  <div class="ic"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></div>
+  <div class="txt">
+    <h3>탐구 현황판</h3>
+    <p>8팀의 설계 코드를 붙여넣으면 중복 설계, 장비 충돌, 목적축 쏠림, 단원 커버리지를 한 화면에서 점검합니다.</p>
+  </div>
+  <span class="go">현황판 열기 →</span>
+</a>
+
+<div class="docs">
+  <h3>함께 쓰는 자료</h3>
+  <p>웹 도구와 별개로 배포되는 파일입니다.</p>
+  <div class="dlist">
+    <div class="ditem"><b>수업 운영 지도서</b><span>훅 → 개념 모듈 → 실험 아이디어의 설계 의도</span></div>
+    <div class="ditem"><b>시약 구매 목록</b><span>12주제 대응 종합 목록과 안전 주의</span></div>
+    <div class="ditem"><b>발주 계산 엑셀</b><span>팀 수를 바꾸면 발주량 자동 계산</span></div>
+    <div class="ditem"><b>분석 템플릿 노트북</b><span>최소제곱 · 오차 전파 · ODE · 시뮬레이션</span></div>
+  </div>
+</div>
+
+</main>
+
+<footer><div class="wrap">
+  <p>고급화학 팀 탐구 · 25명 8팀 · 8일 블록타임<br>
+  결과가 맞았는지가 아니라, 과정이 정직했는지를 봅니다.</p>
+</div></footer>
+
+<script>
+// shell 안에 있으면 링크 클릭을 부모 탭 전환으로
+if(window.self!==window.top){
+  var MAP={'sim.html':'sim','design.html':'design','lab.html':'lab','teacher.html':'teacher','index.html':'home'};
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var raw=a.getAttribute('href'), p=raw.split('#'), file=p[0], frag=p[1];
+    if(MAP[file]!==undefined){
+      a.addEventListener('click',function(e){
+        e.preventDefault();
+        parent.postMessage({t:'goTab',id:MAP[file],frag:frag||''},'*');
+      });
+    }
+  });
+}
+</script>
+</body>
+</html>

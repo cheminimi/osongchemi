@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급화학 결정장 시뮬레이터</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ===== Apple design language · DARK ===== */
+:root{
+  --bg:#000000;          /* apple 다크 순검정 */
+  --surface:#1c1c1e;     /* 카드 */
+  --surface-2:#2c2c2e;   /* 칩·인셋 */
+  --ink:#f5f5f7;
+  --ink-2:#aeaeb2;
+  --ink-3:#8e8e93;
+  --rule:#38383a;
+  --tint:#0a84ff;        /* apple 다크 블루 */
+  --tint-2:#409cff;
+  --accent:#30d158;      /* apple 다크 그린 (리간드 강조) */
+  --amber:#ff9f0a;       /* 상자성/경고 */
+  --r:20px;--r-sm:13px;
+  --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard Variable",Pretendard,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5;letter-spacing:-0.01em}
+.wrap{max-width:1140px;margin:0 auto;padding:0 22px}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(0,0,0,0.7);backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--rule)}
+.nbar{display:flex;align-items:center;justify-content:space-between;height:56px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px}
+.logo svg{color:var(--tint)}
+.nlinks{display:flex;gap:26px}
+.nlinks a{font-size:13.5px;color:var(--ink-2);text-decoration:none;transition:.16s}
+.nlinks a:hover{color:var(--ink)}
+@media(max-width:640px){.nlinks{display:none}}
+
+/* hero */
+.hero{padding:90px 0 70px}
+.hgrid{display:grid;grid-template-columns:1fr 1.05fr;gap:56px;align-items:center}
+.eyebrow{font-size:13px;letter-spacing:0.02em;color:var(--tint);font-weight:600;margin-bottom:16px}
+.hero h1{font-size:52px;font-weight:700;line-height:1.07;letter-spacing:-0.035em;margin-bottom:22px}
+.hero h1 span{color:var(--tint)}
+.hero p.sub{font-size:18px;color:var(--ink-2);line-height:1.6;margin-bottom:30px;max-width:440px}
+.cta{display:inline-flex;align-items:center;gap:7px;background:var(--tint);color:#fff;
+  padding:13px 26px;border-radius:980px;font-weight:500;font-size:15px;text-decoration:none;transition:.2s}
+.cta:hover{background:var(--tint-2);transform:scale(1.02)}
+.hooks{display:flex;flex-direction:column;gap:12px}
+.hook{background:var(--surface);border-radius:var(--r-sm);padding:20px 22px;transition:.2s;display:flex;gap:15px}
+.hook:hover{background:#242426}
+.hook .hi{color:var(--tint);flex:none;margin-top:2px}
+.hook h3{font-size:15px;font-weight:600;margin-bottom:5px}
+.hook p{font-size:13.5px;color:var(--ink-2);line-height:1.55;margin-bottom:7px}
+.hook .tag{font-size:12.5px;color:var(--tint);font-weight:500}
+
+/* section */
+section.blk{border-top:1px solid var(--rule);padding:70px 0}
+.shead{margin-bottom:44px}
+.shead .ey{font-size:13px;letter-spacing:0.02em;color:var(--tint);font-weight:600;margin-bottom:9px}
+.shead h2{font-size:38px;font-weight:700;letter-spacing:-0.03em;line-height:1.1;margin-bottom:12px}
+.shead p{font-size:17px;color:var(--ink-2);line-height:1.55;max-width:620px}
+
+/* simulator */
+.sim{display:grid;grid-template-columns:370px 1fr;gap:26px;align-items:start}
+@media(max-width:900px){.sim{grid-template-columns:1fr}.hgrid{grid-template-columns:1fr;gap:40px}.hero h1{font-size:40px}}
+.ctrl-lbl{font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:12px;font-family:var(--mono)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:26px}
+.opt{font-family:var(--mono);font-size:14px;padding:12px 14px;border-radius:var(--r-sm);
+  background:var(--surface);border:2px solid transparent;color:var(--ink-2);cursor:pointer;transition:.16s;text-align:left}
+.opt:hover{color:var(--ink);background:#242426}
+.opt.on{border-color:var(--tint);background:color-mix(in srgb,var(--tint) 16%,var(--surface));color:var(--tint)}
+.opt.lig.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent)}
+.opt small{opacity:.5;font-weight:400;margin-left:4px}
+
+.swatch{border-radius:var(--r-sm);overflow:hidden;margin-bottom:20px;transition:background-color .5s ease;min-height:88px;display:flex;align-items:flex-end}
+.swatch .sin{padding:18px 20px}
+.swatch .slbl{font-family:var(--mono);font-size:12px;opacity:.6;margin-bottom:2px}
+.swatch .sname{font-size:19px;font-weight:700;letter-spacing:-0.02em}
+
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.key{background:var(--surface);border-radius:var(--r-sm);padding:14px 16px}
+.key .kk{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin-bottom:3px}
+.key .kv{font-size:15px;font-weight:600}
+.key .kn{font-size:12px;color:var(--ink-3);margin-top:2px}
+
+.diag{display:flex;flex-direction:column;gap:20px}
+.panel{background:var(--surface);border-radius:var(--r);padding:26px}
+.panel .plbl{font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:18px;font-family:var(--mono)}
+.orb-cap{font-family:var(--mono);font-size:13px;text-align:center;margin-top:6px}
+.orb-cap .up{color:var(--ink-3)}
+.orb-cap .np{font-weight:700}
+
+.specbar{height:16px;border-radius:980px;overflow:hidden;position:relative;
+  background:linear-gradient(to right,#8B00FF,#4400FF,#0000FF,#0088FF,#00FFCC,#00FF44,#AAFF00,#FFFF00,#FFAA00,#FF5500,#FF0000)}
+.specbar .mark{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.5)}
+.specrow{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.specnote{font-size:13px;color:var(--ink-2);margin-top:14px;line-height:1.6}
+.specnote b{color:var(--ink)}
+.specnote .mono{font-family:var(--mono)}
+.specnote .t{color:var(--tint)}
+
+.series{display:flex;align-items:center;overflow-x:auto;padding-bottom:4px}
+.sr{display:flex;align-items:center;flex:none}
+.sr .lg{font-family:var(--mono);font-size:13px;padding:4px 9px;border-radius:8px;color:var(--ink-3);transition:.16s}
+.sr .lg.sel{color:var(--ink-3);opacity:.4}
+.sr .lg.on{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);font-weight:700}
+.sr .gt{color:var(--ink-3);opacity:.4;font-size:12px;margin:0 2px}
+.serow{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--ink-3)}
+
+/* van't Hoff */
+.vhf{display:grid;grid-template-columns:340px 1fr;gap:26px;align-items:start}
+@media(max-width:900px){.vhf{grid-template-columns:1fr}}
+.slider-wrap{background:var(--surface);border-radius:var(--r);padding:24px}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:980px;background:var(--surface-2);margin:16px 0;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--tint);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--tint);cursor:pointer;border:none}
+.tval{font-family:var(--mono);font-size:28px;font-weight:700;text-align:center;letter-spacing:-0.02em}
+.tval small{font-size:14px;color:var(--ink-3);font-weight:400}
+.vstats{display:flex;flex-direction:column;gap:9px;margin-top:20px}
+.vstat{display:flex;justify-content:space-between;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule)}
+.vstat:last-child{border-bottom:none}
+.vstat .vk{font-size:13px;color:var(--ink-3)}
+.vstat .vv{font-family:var(--mono);font-size:14px;font-weight:600}
+.chart-wrap{background:var(--surface);border-radius:var(--r);padding:26px}
+
+/* teams */
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.tcard{background:var(--surface);border-radius:var(--r-sm);padding:20px;transition:.2s;position:relative;overflow:hidden}
+.tcard:hover{background:#242426;transform:translateY(-3px)}
+.tcard .bar{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc)}
+.tcard .tn{font-family:var(--mono);font-size:11px;color:var(--tc);font-weight:700;letter-spacing:0.04em}
+.tcard .tt{font-size:17px;font-weight:700;letter-spacing:-0.02em;margin:3px 0 9px}
+.tcard .tq{font-size:13px;color:var(--ink-2);line-height:1.5;margin-bottom:13px;min-height:58px}
+.tcard .tmeta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tcard .diff{font-family:var(--mono);font-size:11px;color:var(--amber);font-weight:600}
+.tcard .unit{font-size:11px;color:var(--ink-3);background:var(--surface-2);padding:3px 9px;border-radius:980px}
+.xref{background:color-mix(in srgb,var(--amber) 12%,var(--surface));border-radius:var(--r-sm);padding:18px 20px;margin-top:20px;display:flex;gap:14px;align-items:flex-start}
+.xref .xi{color:var(--amber);flex:none;font-size:19px;margin-top:1px}
+.xref b{font-size:14.5px;font-weight:600;display:block;margin-bottom:4px}
+.xref p{font-size:13px;color:var(--ink-2);line-height:1.6}
+
+footer{border-top:1px solid var(--rule);padding:28px 0 44px}
+footer p{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:0.02em;line-height:1.7}
+footer a{color:var(--tint);text-decoration:none}
+:focus-visible{outline:2.5px solid var(--tint);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:640px){.wrap{padding:0 18px}.hero h1{font-size:34px}.shead h2{font-size:29px}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap"><div class="nbar">
+  <div class="logo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V3"/></svg>
+    <span>결정장 시뮬레이터</span>
+  </div>
+  <div class="nlinks">
+    <a href="index.html" class="cross">홈</a>
+    <a href="#sim" style="color:var(--ink)">시뮬레이터</a>
+    <a href="#vhf">van't Hoff</a>
+    <a href="#teams">팀 탐구</a>
+    <a href="design.html" class="cross">설계실</a>
+    <a href="lab.html" class="cross">기록장</a>
+  </div>
+</div></div></nav>
+
+<!-- HERO -->
+<header class="hero"><div class="wrap"><div class="hgrid">
+  <div>
+    <p class="eyebrow">고급화학 · Advanced Chemistry</p>
+    <h1>기존 모델이<br><span>무너지는</span> 순간</h1>
+    <p class="sub">화학 1·2의 지식으로는 설명할 수 없는 현상에서 출발합니다. 루이스 구조와 옥텟 규칙이 멈추는 곳에서 결정장 이론이 시작됩니다.</p>
+    <a href="#sim" class="cta">시뮬레이터 시작 →</a>
+  </div>
+  <div class="hooks" id="hooks"></div>
+</div></div></header>
+
+<!-- SIMULATOR -->
+<section class="blk" id="sim"><div class="wrap">
+  <div class="shead">
+    <p class="ey">Interactive Simulation</p>
+    <h2>결정장 이론 시뮬레이터</h2>
+    <p>금속 이온과 리간드를 선택하면 d 오비탈 분리, 흡수 파장, 용액 색이 즉시 계산됩니다.</p>
+  </div>
+  <div class="sim">
+    <div>
+      <p class="ctrl-lbl">금속 이온</p>
+      <div class="opts" id="metalOpts"></div>
+      <p class="ctrl-lbl">리간드</p>
+      <div class="opts" id="ligandOpts"></div>
+      <div class="swatch" id="swatch"><div class="sin">
+        <p class="slbl" id="swatchLbl"></p><p class="sname" id="swatchName"></p>
+      </div></div>
+      <div class="keys" id="keys"></div>
+    </div>
+    <div class="diag">
+      <div class="panel">
+        <p class="plbl">d 오비탈 분리 다이어그램</p>
+        <div id="orbital"></div>
+      </div>
+      <div class="panel">
+        <p class="plbl">흡수 파장 위치</p>
+        <div class="specbar"><div class="mark" id="specMark"></div></div>
+        <div class="specrow"><span>380</span><span id="specLmax"></span><span>700 nm</span></div>
+        <p class="specnote" id="specNote"></p>
+      </div>
+      <div class="panel">
+        <p class="plbl">분광화학적 계열 (Spectrochemical Series)</p>
+        <div class="series" id="series"></div>
+        <div class="serow"><span>약한 장 · 큰 λmax · 작은 Δ</span><span>강한 장 · 작은 λmax · 큰 Δ</span></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- VAN'T HOFF -->
+<section class="blk" id="vhf"><div class="wrap">
+  <div class="shead">
+    <p class="ey">Thermodynamic Simulation</p>
+    <h2>van't Hoff 플롯 시뮬레이터</h2>
+    <p>온도를 바꾸면 평형 상수 K가 어떻게 변하는지, ln K와 1/T의 직선 관계에서 ΔH°와 ΔS°가 어떻게 나오는지 확인합니다.</p>
+  </div>
+  <div class="vhf">
+    <div class="slider-wrap">
+      <p class="ctrl-lbl">온도</p>
+      <div class="tval"><span id="tCval">25</span><small> °C</small></div>
+      <input type="range" min="0" max="100" value="25" id="tSlider">
+      <div class="specrow"><span>0 °C</span><span>100 °C</span></div>
+      <div class="vstats" id="vstats"></div>
+    </div>
+    <div class="chart-wrap">
+      <p class="plbl" style="font-size:12px;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:16px;font-family:var(--mono)">ln K vs 1/T × 10³ (van't Hoff Plot)</p>
+      <div id="chart"></div>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:var(--ink-3);margin-top:18px;line-height:1.6">
+    ※ 이 곡선은 <b style="color:var(--ink-2)">킬레이트 착물 형성의 예시값</b>(ΔH° = +50 kJ/mol, ΔS° = +160 J/mol·K)으로 그린 것입니다. 실제 팀 실험에서는 여러분이 측정한 K(T) 데이터로 이 직선을 직접 그리게 됩니다.
+  </p>
+</div></section>
+
+<!-- TEAMS -->
+<section class="blk" id="teams"><div class="wrap">
+  <div class="shead">
+    <p class="ey">Team Inquiry</p>
+    <h2>팀 심화 탐구 주제</h2>
+    <p>12개 주제 모두 화학 1·2로는 설명이 막히는 지점에서 출발합니다. 각 팀이 하나를 골라 3축으로 질문을 좁히고, 실험 또는 시뮬레이션으로 답합니다.</p>
+  </div>
+  <div class="tgrid" id="teamGrid"></div>
+  <div class="xref">
+    <span class="xi">⇄</span>
+    <div>
+      <b>교차검증 하이라이트 — 킬레이트 안정도 ↔ 전지 전위</b>
+      <p>킬레이트 팀은 분광법(van't Hoff)으로, 전지 전위 팀은 전기화학(Nernst 식)으로 <b style="color:var(--ink)">같은 형성 상수 Kf</b>를 독립적으로 구합니다. 두 값이 어긋날 때 그 격차를 따지는 것이 이 수업의 하이라이트입니다.</p>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>고급화학 결정장 시뮬레이터 · 금속·리간드를 바꿔 Δ와 색과 자성을 직접 확인하세요<br>
+  탐구 설계는 <a href="design.html" class="cross">설계실</a>에서 · 기록은 <a href="lab.html" class="cross">기록장</a>에서</p>
+</div></footer>
+
+<script>
+/* ===== DATA (피그마 App.tsx에서 이식·검증) ===== */
+const METALS={
+ "Cu²⁺":{d:9,ligands:{
+   "Cl⁻":{lambda:850,geometry:"사면체형",name:"[CuCl₄]²⁻",sol:"#8db86e",textCol:"#1a2e00",lowSpin:null},
+   "H₂O":{lambda:810,geometry:"팔면체형",name:"[Cu(H₂O)₆]²⁺",sol:"#1565c0",textCol:"#e3f2fd",lowSpin:null},
+   "NH₃":{lambda:600,geometry:"사각평면형",name:"[Cu(NH₃)₄]²⁺",sol:"#0d47a1",textCol:"#e3f2fd",lowSpin:null},
+   "en":{lambda:545,geometry:"사각평면형",name:"[Cu(en)₂]²⁺",sol:"#1a237e",textCol:"#e8eaf6",lowSpin:null}}},
+ "Co²⁺":{d:7,ligands:{
+   "Cl⁻":{lambda:690,geometry:"사면체형",name:"[CoCl₄]²⁻",sol:"#1565c0",textCol:"#e3f2fd",lowSpin:false},
+   "H₂O":{lambda:510,geometry:"팔면체형",name:"[Co(H₂O)₆]²⁺",sol:"#c2185b",textCol:"#fce4ec",lowSpin:false},
+   "NH₃":{lambda:475,geometry:"팔면체형",name:"[Co(NH₃)₆]²⁺",sol:"#e65100",textCol:"#fff3e0",lowSpin:false},
+   "en":{lambda:460,geometry:"팔면체형",name:"[Co(en)₃]²⁺",sol:"#b71c1c",textCol:"#ffebee",lowSpin:false}}},
+ "Ni²⁺":{d:8,ligands:{
+   "Cl⁻":{lambda:735,geometry:"사면체형",name:"[NiCl₄]²⁻",sol:"#0277bd",textCol:"#e1f5fe",lowSpin:null},
+   "H₂O":{lambda:720,geometry:"팔면체형",name:"[Ni(H₂O)₆]²⁺",sol:"#2e7d32",textCol:"#e8f5e9",lowSpin:null},
+   "NH₃":{lambda:570,geometry:"팔면체형",name:"[Ni(NH₃)₆]²⁺",sol:"#1565c0",textCol:"#e3f2fd",lowSpin:null},
+   "en":{lambda:545,geometry:"팔면체형",name:"[Ni(en)₃]²⁺",sol:"#283593",textCol:"#e8eaf6",lowSpin:null}}},
+ "Fe²⁺":{d:6,ligands:{
+   "Cl⁻":{lambda:835,geometry:"팔면체형",name:"[FeCl₄]²⁻",sol:"#558b2f",textCol:"#f1f8e9",lowSpin:false},
+   "H₂O":{lambda:980,geometry:"팔면체형",name:"[Fe(H₂O)₆]²⁺",sol:"#80cbc4",textCol:"#004d40",lowSpin:false},
+   "NH₃":{lambda:500,geometry:"팔면체형",name:"[Fe(NH₃)₆]²⁺",sol:"#7b1fa2",textCol:"#f3e5f5",lowSpin:false},
+   "CN⁻":{lambda:395,geometry:"팔면체형",name:"[Fe(CN)₆]⁴⁻",sol:"#f0ead0",textCol:"#1a1a00",lowSpin:true}}}
+};
+const SPECTROCHEM=[
+ {id:"I⁻",sel:false},{id:"Br⁻",sel:false},{id:"Cl⁻",sel:true},{id:"OH⁻",sel:false},
+ {id:"H₂O",sel:true},{id:"py",sel:false},{id:"NH₃",sel:true},{id:"en",sel:true},{id:"CN⁻",sel:true},{id:"CO",sel:false}
+];
+const HOOKS=[
+ {icon:"magnet",title:"O₂는 왜 자석에 붙는가?",body:"루이스 구조로는 짝지어진 전자쌍만 나온다. 그런데 액체 산소는 자석 사이에 걸린다.",tag:"→ 분자 오비탈 이론"},
+ {icon:"beaker",title:"같은 Fe²⁺인데 왜 자성이 다른가?",body:"[Fe(H₂O)₆]²⁺는 상자성, [Fe(CN)₆]⁴⁻는 반자성. 리간드만 바뀌었을 뿐인데.",tag:"→ 결정장 이론 · 스핀 상태"},
+ {icon:"zap",title:"CuSO₄는 왜 하얗다가 파래지나?",body:"무수 황산구리(II)는 흰색이다. 물이 닿으면 왜 파란색이 나타나는가?",tag:"→ d-d 전이 · 흡수 스펙트럼"}
+];
+/* 12 주제 (index.html과 동일 체계) */
+const TEAMS=[
+ {n:1,name:"색",c:"#0a84ff",unit:"I 구조",q:"리간드를 세기 순으로 줄 세워 색을 예측하는 계열을 만들 수 있는가?",diff:2},
+ {n:2,name:"자성",c:"#5ac8fa",unit:"I 구조",q:"색(Δ)만 보고도 홀전자 수와 자성을 예측할 수 있는가?",diff:5},
+ {n:3,name:"킬레이트 안정도",c:"#bf5af2",unit:"I·III·IV",q:"킬레이트가 더 안정한 이유는 ΔH인가 ΔS인가?",diff:4},
+ {n:4,name:"흡광 세기",c:"#0071e3",unit:"I 구조",q:"ε의 100배 차이는 무엇이 만드는가 — 어떤 전이가 강한 색을 내는가?",diff:3},
+ {n:5,name:"산의 세기",c:"#ff9f0a",unit:"IV 평형",q:"H가 없는 금속 이온의 산도를 전하/반지름 비로 예측할 수 있는가?",diff:2},
+ {n:6,name:"자발성",c:"#30d158",unit:"III 에너지",q:"흡열인데도 자발적이려면 ΔS가 얼마나 커야 하는가?",diff:3},
+ {n:7,name:"평형의 이동",c:"#ff375f",unit:"III·IV",q:"K의 온도 변화에서 ΔH와 ΔS를 분리해낼 수 있는가?",diff:4},
+ {n:8,name:"속도식과 메커니즘",c:"#5e5ce6",unit:"VI 속도",q:"실험 속도식만으로 메커니즘을 하나로 좁힐 수 있는가?",diff:4},
+ {n:9,name:"촉매",c:"#ac8e68",unit:"VI 속도",q:"효소는 왜 무기 촉매와 다른 속도 곡선을 그리는가?",diff:3},
+ {n:10,name:"전지 전위",c:"#ff9f0a",unit:"V 전기화학",q:"착물 형성에 따른 전위 이동에서 Kf를 역산할 수 있는가?",diff:4},
+ {n:11,name:"총괄성",c:"#ff453a",unit:"II 용액",q:"우레아는 왜 삼투압 예측을 벗어나 적혈구를 터뜨리는가?",diff:3},
+ {n:12,name:"고체 구조",c:"#8e8e93",unit:"II 용액",q:"밀도만 재고도 원자 배열과 아보가드로수를 알아낼 수 있는가?",diff:3}
+];
+const R=8.314, DH0=50000, DS0=160;
+
+/* ===== helpers ===== */
+const $=id=>document.getElementById(id);
+const getDelta=lam=>Math.round(119600/lam);
+function electronConfig(d,lowSpin,oct){
+  if(oct){
+    const t2g=[0,0,0],eg=[0,0];
+    if(lowSpin===true){
+      for(let i=0;i<d;i++){ if(i<6){const x=i%3;t2g[x]=t2g[x]===0?1:2;} else {const x=(i-6)%2;eg[x]=eg[x]===0?1:2;} }
+    } else {
+      for(let i=0;i<d;i++){ if(i<5){ if(i<3)t2g[i]=1; else eg[i-3]=1; } else { const p=i-5; if(p<3)t2g[p]=2; else eg[p-3]=2; } }
+    }
+    return {lower:t2g,lowerLabel:"t₂g",upper:eg,upperLabel:"eg"};
+  } else {
+    const e=[0,0],t2=[0,0,0];
+    for(let i=0;i<d;i++){ if(i<5){ if(i<2)e[i]=1; else t2[i-2]=1; } else { const p=i-5; if(p<2)e[p]=2; else t2[p-2]=2; } }
+    return {lower:e,lowerLabel:"e",upper:t2,upperLabel:"t₂"};
+  }
+}
+
+/* ===== state ===== */
+let metal="Cu²⁺", ligand="H₂O", tempC=25;
+
+/* ===== render: hooks ===== */
+function icon(name){
+  const p={magnet:'<path d="M6 3v7a6 6 0 0012 0V3M6 7h4M14 7h4"/>',
+    beaker:'<path d="M9 3h6M10 3v6l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V3"/>',
+    zap:'<path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>'}[name];
+  return `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+$("hooks").innerHTML=HOOKS.map(h=>`<div class="hook"><span class="hi">${icon(h.icon)}</span><div>
+  <h3>${h.title}</h3><p>${h.body}</p><span class="tag">${h.tag}</span></div></div>`).join("");
+
+/* ===== render: simulator ===== */
+function renderOpts(){
+  $("metalOpts").innerHTML=Object.entries(METALS).map(([m,d])=>
+    `<button class="opt ${metal===m?"on":""}" data-m="${m}">${m}<small>d${d.d}</small></button>`).join("");
+  const ligs=Object.keys(METALS[metal].ligands);
+  $("ligandOpts").innerHTML=ligs.map(l=>
+    `<button class="opt lig ${ligand===l?"on":""}" data-l="${l}">${l}</button>`).join("");
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
+    metal=b.dataset.m;
+    if(!Object.keys(METALS[metal].ligands).includes(ligand)) ligand="H₂O";
+    renderAll();
+  });
+  document.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>{ ligand=b.dataset.l; renderAll(); });
+}
+
+function orbitalSVG(d,lowSpin,geometry){
+  const oct=geometry!=="사면체형";
+  const {lower,lowerLabel,upper,upperLabel}=electronConfig(d,lowSpin,oct);
+  const OW=34,OH=24,GAP=9,W=280,H=176,LY=132,UY=30;
+  const lw=lower.length*OW+(lower.length-1)*GAP, uw=upper.length*OW+(upper.length-1)*GAP;
+  const lx=(W-lw)/2, ux=(W-uw)/2;
+  const unpaired=[...lower,...upper].filter(v=>v===1).length;
+  const orb=(fill,x,y)=>{
+    let s=`<rect x="${x}" y="${y}" width="${OW}" height="${OH}" rx="3" fill="#0c0c0e" stroke="#48484a" stroke-width="1.5"/>`;
+    if(fill>=1) s+=`<text x="${x+(fill===2?11:17)}" y="${y+16}" fill="#0a84ff" font-size="14" font-weight="700">↑</text>`;
+    if(fill===2) s+=`<text x="${x+23}" y="${y+16}" fill="#ff9f0a" font-size="14" font-weight="700">↓</text>`;
+    return s;
+  };
+  let svg=`<svg width="${W}" height="${H}" style="display:block;margin:0 auto">`;
+  // Δ bracket
+  svg+=`<line x1="15" y1="${UY+OH/2}" x2="15" y2="${LY+OH/2}" stroke="#0a84ff" stroke-width="1.5" stroke-dasharray="4 2"/>`;
+  svg+=`<line x1="10" y1="${UY+OH/2}" x2="20" y2="${UY+OH/2}" stroke="#0a84ff" stroke-width="1.5"/>`;
+  svg+=`<line x1="10" y1="${LY+OH/2}" x2="20" y2="${LY+OH/2}" stroke="#0a84ff" stroke-width="1.5"/>`;
+  svg+=`<text x="24" y="${(UY+LY)/2+OH/2+4}" fill="#0a84ff" font-size="14" font-style="italic">Δ</text>`;
+  // labels + orbitals
+  svg+=`<text x="${ux-34}" y="${UY+16}" fill="#8e8e93" font-size="10" font-family="monospace">${upperLabel}</text>`;
+  upper.forEach((f,i)=>svg+=orb(f,ux+i*(OW+GAP),UY));
+  svg+=`<text x="${lx-34}" y="${LY+16}" fill="#8e8e93" font-size="10" font-family="monospace">${lowerLabel}</text>`;
+  lower.forEach((f,i)=>svg+=orb(f,lx+i*(OW+GAP),LY));
+  // energy axis
+  svg+=`<line x1="${W-16}" y1="${LY+30}" x2="${W-16}" y2="${UY-4}" stroke="#48484a" stroke-width="1"/>`;
+  svg+=`<polygon points="${W-20},${UY-4} ${W-12},${UY-4} ${W-16},${UY-10}" fill="#48484a"/>`;
+  svg+=`<text x="${W-9}" y="${(UY+LY)/2+OH/2}" fill="#48484a" font-size="9" text-anchor="middle" transform="rotate(-90 ${W-9} ${(UY+LY)/2+OH/2})">에너지</text>`;
+  svg+=`</svg>`;
+  return {svg,unpaired};
+}
+
+function renderAll(){
+  renderOpts();
+  const md=METALS[metal], c=md.ligands[ligand], delta=getDelta(c.lambda), oct=c.geometry!=="사면체형";
+  // swatch
+  const sw=$("swatch"); sw.style.backgroundColor=c.sol;
+  $("swatchLbl").textContent=`용액 색 · ${c.geometry}`; $("swatchLbl").style.color=c.textCol;
+  $("swatchName").textContent=c.name; $("swatchName").style.color=c.textCol;
+  // keys
+  const keys=[
+   {k:"λmax",v:`${c.lambda} nm`,n:c.lambda>700?"가시광 이상":"가시광 영역"},
+   {k:"Δ",v:`${delta} kJ/mol`,n:oct?"팔면체 분리":"사면체 분리"},
+   {k:"기하 구조",v:c.geometry,n:""},
+   {k:"스핀",v:c.lowSpin===null?"—":c.lowSpin?"저스핀 (LS)":"고스핀 (HS)",n:""}
+  ];
+  $("keys").innerHTML=keys.map(o=>`<div class="key"><p class="kk">${o.k}</p><p class="kv">${o.v}</p>${o.n?`<p class="kn">${o.n}</p>`:""}</div>`).join("");
+  // orbital
+  const {svg,unpaired}=orbitalSVG(md.d,c.lowSpin,c.geometry);
+  $("orbital").innerHTML=svg+`<p class="orb-cap"><span class="up">홀전자 </span><span class="np" style="color:#0a84ff">${unpaired}</span><span class="up"> · </span><span style="color:${unpaired>0?"#ff9f0a":"#8e8e93"}">${unpaired>0?"상자성 (paramagnetic)":"반자성 (diamagnetic)"}</span></p>`;
+  // spectrum
+  const VIS_MIN=380,VIS_MAX=700;
+  const pct=c.lambda<VIS_MAX?Math.max(0,Math.min(100,((c.lambda-VIS_MIN)/(VIS_MAX-VIS_MIN))*100)):null;
+  if(pct===null){$("specMark").style.display="none";}
+  else{$("specMark").style.display="block";$("specMark").style.left=pct+"%";}
+  $("specLmax").innerHTML=`λmax = ${c.lambda} nm${pct===null?" (IR)":""}`;
+  $("specLmax").style.color=pct===null?"#ff9f0a":"#8e8e93";
+  $("specNote").innerHTML=`착물이 <span class="mono" style="color:var(--ink)">${c.lambda} nm</span> 빛을 흡수하므로, 우리 눈에는 <b>보색</b>이 보입니다. &nbsp;Δ = <span class="mono t">${delta} kJ/mol</span>`;
+  // series
+  $("series").innerHTML=SPECTROCHEM.map((it,i)=>{
+    const on=it.id===ligand;
+    const cls=on?"on":(it.sel?"sel-avail":"sel");
+    return `<div class="sr"><span class="lg ${on?"on":(it.sel?"":"sel")}">${it.id}</span>${i<SPECTROCHEM.length-1?'<span class="gt">&lt;</span>':""}</div>`;
+  }).join("");
+}
+
+/* ===== van't Hoff ===== */
+const VHF=[]; for(let i=0;i<21;i++){const T=273+i*5; VHF.push({T,invT:+(1000/T).toFixed(3),lnK:+(-(DH0/(R*T))+DS0/R).toFixed(2)});}
+
+function renderVHF(){
+  const T=tempC+273, lnK=-(DH0/(R*T))+DS0/R, K=Math.exp(lnK), invT=(1000/T).toFixed(3);
+  $("tCval").textContent=tempC;
+  $("vstats").innerHTML=[
+   ["현재 온도",`${T} K`],
+   ["1/T × 10³",`${invT} K⁻¹`],
+   ["ln K",lnK.toFixed(2)],
+   ["K",K.toExponential(2)],
+   ["기울기 (−ΔH°/R)",`${(-DH0/R).toFixed(0)} K`],
+   ["ΔH°",`+${(DH0/1000).toFixed(0)} kJ/mol`],
+   ["ΔS°",`+${DS0} J/mol·K`]
+  ].map(([k,v])=>`<div class="vstat"><span class="vk">${k}</span><span class="vv">${v}</span></div>`).join("");
+  drawChart(invT,lnK);
+}
+
+function drawChart(curInvT,curLnK){
+  const W=560,H=300,pad={l:52,r:20,t:16,b:44};
+  const xs=VHF.map(d=>d.invT), ys=VHF.map(d=>d.lnK);
+  const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+  const px=v=>pad.l+(v-xmin)/(xmax-xmin)*(W-pad.l-pad.r);
+  const py=v=>H-pad.b-(v-ymin)/(ymax-ymin)*(H-pad.t-pad.b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">`;
+  // grid
+  for(let i=0;i<=4;i++){
+    const gy=pad.t+(H-pad.t-pad.b)*i/4;
+    s+=`<line x1="${pad.l}" y1="${gy}" x2="${W-pad.r}" y2="${gy}" stroke="#38383a" stroke-width="1"/>`;
+    const yval=(ymax-(ymax-ymin)*i/4).toFixed(1);
+    s+=`<text x="${pad.l-8}" y="${gy+4}" fill="#8e8e93" font-size="11" text-anchor="end" font-family="monospace">${yval}</text>`;
+  }
+  for(let i=0;i<=4;i++){
+    const gx=pad.l+(W-pad.l-pad.r)*i/4;
+    const xval=(xmin+(xmax-xmin)*i/4).toFixed(2);
+    s+=`<text x="${gx}" y="${H-pad.b+18}" fill="#8e8e93" font-size="11" text-anchor="middle" font-family="monospace">${xval}</text>`;
+  }
+  // axis labels
+  s+=`<text x="${(pad.l+W-pad.r)/2}" y="${H-6}" fill="#8e8e93" font-size="11" text-anchor="middle">1/T × 10³ (K⁻¹)</text>`;
+  s+=`<text x="14" y="${(pad.t+H-pad.b)/2}" fill="#8e8e93" font-size="11" text-anchor="middle" transform="rotate(-90 14 ${(pad.t+H-pad.b)/2})">ln K</text>`;
+  // line
+  let dpath=VHF.map((d,i)=>`${i?"L":"M"}${px(d.invT).toFixed(1)} ${py(d.lnK).toFixed(1)}`).join(" ");
+  s+=`<path d="${dpath}" fill="none" stroke="#0a84ff" stroke-width="2.5"/>`;
+  // current point
+  const cx=px(+curInvT), cy=py(curLnK);
+  s+=`<line x1="${cx}" y1="${pad.t}" x2="${cx}" y2="${H-pad.b}" stroke="#ff9f0a" stroke-width="1" stroke-dasharray="4 3"/>`;
+  s+=`<circle cx="${cx}" cy="${cy}" r="6" fill="#ff9f0a" stroke="#000" stroke-width="2"/>`;
+  s+=`</svg>`;
+  $("chart").innerHTML=s;
+}
+
+/* ===== teams ===== */
+$("teamGrid").innerHTML=TEAMS.map(t=>`<div class="tcard" style="--tc:${t.c}">
+  <span class="bar"></span>
+  <p class="tn">주제 ${String(t.n).padStart(2,"0")}</p>
+  <p class="tt">${t.name}</p>
+  <p class="tq">${t.q}</p>
+  <div class="tmeta"><span class="diff">난이도 ${"★".repeat(t.diff)}${"☆".repeat(5-t.diff)}</span><span class="unit">${t.unit}</span></div>
+</div>`).join("");
+
+/* ===== init ===== */
+$("tSlider").addEventListener("input",e=>{tempC=+e.target.value;renderVHF();});
+renderAll();
+renderVHF();
+</script>
+<script>
+/* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */
+(function(){
+  if(window.self===window.top) return;
+  document.documentElement.classList.add('embedded');
+  var s=document.createElement('style');
+  s.textContent=".gtb{display:none!important}"+
+    "header{top:0!important}"+
+    ".side{top:80px!important}"+
+    "nav .nlinks a.cross{display:none!important}";
+  document.head.appendChild(s);
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.t==='goFrag'&&e.data.frag){
+      var el=document.getElementById(e.data.frag);
+      if(el) el.scrollIntoView({behavior:'smooth'});
+      else location.hash=e.data.frag;
+    }
+  });
+})();
+</script>
+</body>
+</html>

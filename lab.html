@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급화학 실험 기록장</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ===== Apple-inspired design language (lab) ===== */
+:root{
+  --paper:#f5f5f7;--paper-2:#ffffff;--ink:#1d1d1f;--ink-2:#424245;--ink-3:#86868b;
+  --rule:#e8e8ed;--rule-2:#f0f0f2;--ok:#1d8a4e;--warn:#d0342c;--accent:#0071e3;--fail:#bf5000;
+  --shadow:0 4px 20px rgba(0,0,0,0.06);--shadow-lg:0 8px 30px rgba(0,0,0,0.09);
+  --r:18px;--r-sm:12px;
+  --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard Variable",Pretendard,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5;letter-spacing:-0.01em}
+.wrap{max-width:940px;margin:0 auto;padding:0 22px}
+header{background:rgba(245,245,247,0.8);backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);position:sticky;top:50px;z-index:40;border-bottom:1px solid var(--rule)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;flex-wrap:wrap}
+.brand h1{font-size:19px;font-weight:600;letter-spacing:-0.02em;display:inline}
+.brand span{font-size:12px;color:var(--ink-3);letter-spacing:0;margin-left:10px}
+.nav{display:flex;gap:8px}
+.nav a{font-size:13px;font-weight:500;color:var(--ink-2);text-decoration:none;padding:7px 15px;border-radius:980px;transition:.16s}
+.nav a:hover{background:#e8e8ed}
+.nav a.here{background:var(--ink);color:#fff}
+
+main{padding:40px 0 100px}
+.eyebrow{font-size:13px;letter-spacing:0;color:var(--accent);margin-bottom:9px;font-weight:600}
+h2{font-size:28px;font-weight:700;letter-spacing:-0.03em;margin-bottom:9px;line-height:1.15}
+.lede{color:var(--ink-2);font-size:16px;line-height:1.6;max-width:680px;margin-bottom:26px}
+.lede b{color:var(--ink);font-weight:600}
+section{margin-bottom:36px}
+
+.card{background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.card-h{padding:16px 22px;border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.card-h b{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.card-h span{font-size:12.5px;color:var(--ink-3)}
+.card-b{padding:22px}
+
+textarea,input[type=text]{width:100%;font-family:var(--sans);font-size:15px;line-height:1.65;color:var(--ink);
+  border:2px solid var(--rule);border-radius:var(--r-sm);background:#fff;padding:13px 15px;resize:vertical}
+textarea:focus,input[type=text]:focus{outline:none;border-color:var(--accent)}
+textarea{min-height:80px}
+.mono{font-family:var(--mono);font-size:13px;line-height:1.7}
+.flab{font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 8px;display:block}
+.flab em{font-style:normal;font-weight:400;color:var(--ink-3)}
+
+.btn{font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;padding:11px 22px;
+  border:none;background:var(--accent);color:#fff;transition:.2s;border-radius:980px;letter-spacing:-0.01em}
+.btn:hover{background:#0077ed;transform:scale(1.02)}
+.btn.ghost{background:transparent;color:var(--accent);box-shadow:inset 0 0 0 1.5px #d2d2d7}
+.btn.ghost:hover{background:#f5f5f7;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.btn.sm{padding:8px 16px;font-size:13.5px}
+.bar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.note{font-size:12.5px;color:var(--ink-3)}
+.ok{color:var(--ok);font-weight:600;font-size:13px}
+
+/* design summary */
+.dgrid{display:grid;grid-template-columns:100px 1fr;gap:0}
+.dgrid .dk{font-size:11.5px;font-weight:600;color:var(--ink-3);letter-spacing:0;padding:11px 0;border-bottom:1px solid var(--rule-2)}
+.dgrid .dv{font-size:14px;padding:11px 0 11px 14px;border-bottom:1px solid var(--rule-2);line-height:1.55}
+.dgrid .dk:last-of-type,.dgrid .dv:last-of-type{border-bottom:none}
+.dv b{font-weight:600}
+.code-chip{font-family:var(--mono);font-weight:600;font-size:13.5px;letter-spacing:0.02em;background:var(--ink);color:#fff;padding:7px 15px;border-radius:980px}
+
+/* question revision timeline */
+.qrev{display:flex;flex-direction:column;gap:0}
+.qv{display:grid;grid-template-columns:46px 1fr;gap:0;position:relative}
+.qv .vtag{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);padding:14px 0}
+.qv .vbody{padding:14px 0 14px 16px;border-left:2px solid var(--rule);position:relative}
+.qv .vbody::before{content:"";position:absolute;left:-6px;top:19px;width:10px;height:10px;background:var(--accent);border-radius:50%}
+.qv:last-child .vbody{border-left-color:transparent}
+.qv textarea{min-height:60px;margin-bottom:8px}
+.qv .why{font-size:13px}
+.qhint{font-size:12px;color:var(--ink-3);margin-top:4px;line-height:1.5}
+
+/* days */
+.daytabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.daytab{font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:2px solid transparent;
+  background:var(--paper-2);color:var(--ink-2);padding:10px 16px;transition:.18s;border-radius:980px;box-shadow:var(--shadow)}
+.daytab:hover{transform:translateY(-1px)}
+.daytab.on{background:var(--ink);color:#fff;box-shadow:none}
+.daytab.filled{box-shadow:0 0 0 2px var(--ok),var(--shadow)}
+.daytab.filled.on{box-shadow:none}
+.daytab .dot{color:var(--ok);margin-left:5px}
+.daytab.on .dot{color:#7fe0a5}
+
+.five{display:flex;flex-direction:column;gap:16px}
+.frow .flab .ic{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-right:7px}
+.frow.fail .flab{color:var(--fail)}
+.fail-note{font-size:12px;color:var(--fail);margin-top:6px;font-weight:600}
+.plots-note{background:color-mix(in srgb,var(--accent) 7%,white);padding:14px 18px;font-size:13px;color:#1a4a8a;line-height:1.6;margin-bottom:18px;border-radius:var(--r-sm)}
+
+.divider{height:1px;background:var(--rule);margin:0 0 34px}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+@media(max-width:640px){.wrap{padding:0 18px}.dgrid{grid-template-columns:78px 1fr}}
+
+/* ===== global tool switcher ===== */
+.gtb{position:sticky;top:0;z-index:60;background:rgba(245,245,247,.85);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--rule)}
+.gtb-in{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;
+  justify-content:space-between;height:50px;gap:14px}
+.gtb-home{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;
+  text-decoration:none;color:var(--ink)}
+.gtb-home svg{color:var(--tint,#0071e3)}
+.gtb-nav{display:flex;gap:3px}
+.gtb-nav a{font-size:13px;color:var(--ink-2);text-decoration:none;padding:6px 13px;
+  border-radius:980px;transition:.16s;white-space:nowrap}
+.gtb-nav a:hover{background:#e8e8ed;color:var(--ink)}
+.gtb-nav a.here{background:var(--ink);color:#fff}
+@media(max-width:720px){.gtb-nav a{padding:6px 9px;font-size:12px}.gtb-home span{display:none}}
+</style>
+</head>
+<body>
+
+<div class="gtb"><div class="gtb-in">
+  <a href="index.html" class="gtb-home">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V3"/></svg>
+    <span>고급화학 탐구</span>
+  </a>
+  <nav class="gtb-nav"><a href="index.html">홈</a><a href="sim.html">시뮬레이터</a><a href="design.html">설계실</a><a href="lab.html" class="here">기록장</a><a href="teacher.html">현황판</a></nav>
+</div></div>
+
+<header><div class="wrap"><div class="hbar">
+  <div class="brand"><h1>고급화학 실험 기록장</h1><span>Lab Notebook</span></div>
+  </div>
+
+<header><div class="wrap"><div class="hbar">
+  <div class="brand"><h1>고급화학 실험 기록장</h1><span>Lab Notebook</span></div>
+  <div class="nav">
+    <a href="design.html">설계실</a>
+    <a href="lab.html" class="here">기록장</a>
+    <a href="sim.html">시뮬레이터</a>
+  </div>
+</div></div></header>
+
+<main class="wrap">
+
+<!-- IMPORT -->
+<section>
+  <div class="eyebrow">시작</div>
+  <h2>설계 카드 불러오기</h2>
+  <p class="lede">설계실에서 <b>내려받은 설계 카드</b>를 아래에 붙여넣으면 자동으로 채워집니다. 아직 없다면 먼저 <a href="design.html" style="color:var(--accent)">설계실</a>에서 카드를 만드세요.</p>
+  <div class="card">
+    <div class="card-b">
+      <textarea id="importBox" class="mono" placeholder="여기에 설계 카드 텍스트를 붙여넣으세요 (고급화학 팀 탐구 설계 카드 ...)"></textarea>
+      <div class="bar">
+        <button class="btn" id="importBtn">불러오기</button>
+        <button class="btn ghost sm" id="skipBtn">카드 없이 직접 쓰기</button>
+        <span class="note" id="importMsg"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="body" style="display:none">
+
+<div class="divider"></div>
+
+<!-- DESIGN SUMMARY -->
+<section>
+  <div class="card">
+    <div class="card-h"><b id="teamName">우리 팀</b><span class="code-chip" id="codeChip">— · — · — · —</span></div>
+    <div class="card-b"><div class="dgrid" id="designGrid"></div></div>
+  </div>
+</section>
+
+<!-- QUESTION REVISION -->
+<section>
+  <div class="eyebrow">질문의 변천</div>
+  <h2>메타 질문 개정 이력</h2>
+  <p class="lede">탐구는 <b>데이터가 질문을 고쳐 쓰는 과정</b>입니다. 질문이 한 번도 안 바뀌었다면 예비실험을 제대로 안 한 것입니다. <b>v2 개정은 의무입니다.</b></p>
+  <div class="card"><div class="card-b">
+    <div class="qrev">
+      <div class="qv">
+        <div class="vtag">v1</div>
+        <div class="vbody">
+          <span class="flab">설계 단계의 질문 <em>— 책상에서 만든 첫 질문</em></span>
+          <textarea id="q_v1" placeholder="설계 카드를 불러오면 자동으로 채워집니다"></textarea>
+        </div>
+      </div>
+      <div class="qv">
+        <div class="vtag">v2</div>
+        <div class="vbody">
+          <span class="flab">예비실험 후 개정 <em>— Day 3, "우리 장비로 못 하는 것"을 깨닫고</em></span>
+          <textarea id="q_v2" placeholder="예) Δ 차이가 색으로 보일 만큼 크지 않아서, 리간드를 5개→3개로 줄이고 차이가 큰 것만 비교하기로 좁혔다"></textarea>
+          <input type="text" id="w_v2" class="why" placeholder="왜 바꿨나? (한 줄)">
+        </div>
+      </div>
+      <div class="qv">
+        <div class="vtag">v3</div>
+        <div class="vbody">
+          <span class="flab">데이터 리뷰 후 최종 <em>— Day 5~7, 예상 밖 결과가 드러낸 진짜 질문</em></span>
+          <textarea id="q_v3" placeholder="예) en이 예상보다 Δ가 작게 나왔다. 킬레이트 효과가 Δ에는 반영되지 않는가? 로 질문이 옮겨갔다"></textarea>
+          <input type="text" id="w_v3" class="why" placeholder="왜 바꿨나? (한 줄)">
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- DAILY LAB NOTES -->
+<section>
+  <div class="eyebrow">매일의 기록</div>
+  <h2>랩노트</h2>
+  <p class="lede">매일 블록이 끝나기 전에 다섯 칸을 채웁니다. <b>「망한 것」 칸을 비우지 마세요</b> — 실패를 안 했을 리 없고, 안 적었다면 안 본 것입니다.</p>
+  <div class="daytabs" id="daytabs"></div>
+  <div class="plots-note" id="plotReminder"></div>
+  <div class="card"><div class="card-b">
+    <div style="margin-bottom:14px">
+      <span class="flab">오늘의 목표 <em>— 한 줄</em></span>
+      <input type="text" id="d_goal" placeholder="예) 리간드 3종의 λmax를 각 3회씩 측정한다">
+    </div>
+    <div class="five">
+      <div class="frow"><span class="flab"><span class="ic">01</span>한 것 <em>— 시각과 함께</em></span><textarea id="d_did" placeholder="예) 14:10 NH₃ 착물 흡수 스펙트럼 측정 (400~700nm)"></textarea></div>
+      <div class="frow"><span class="flab"><span class="ic">02</span>본 것 <em>— 관찰·수치, 해석은 아직</em></span><textarea id="d_saw" placeholder="예) λmax = 580nm 부근. 피크가 넓고 뭉툭함"></textarea></div>
+      <div class="frow"><span class="flab"><span class="ic">03</span>생각한 것 <em>— 왜 그럴까</em></span><textarea id="d_thought" placeholder="예) 물 착물보다 λmax가 짧아졌다 → Δ가 커졌다는 뜻? 분광화학적 계열과 맞는다"></textarea></div>
+      <div class="frow fail"><span class="flab"><span class="ic">04</span>★ 망한 것 <em>— 실패·이상치·버린 데이터</em></span><textarea id="d_fail" placeholder="예) 첫 측정은 큐벳에 지문이 묻어 흡광도가 튀었다. 재측정함. / en 착물이 침전이 생겨 3회 중 1회 버림"></textarea><div class="fail-note" id="failNote"></div></div>
+      <div class="frow"><span class="flab"><span class="ic">05</span>내일 할 것 <em>— 구체적으로</em></span><textarea id="d_next" placeholder="예) Cl⁻ 착물 측정. 침전 방지 위해 리간드 과량비 조정"></textarea></div>
+    </div>
+    <div class="bar">
+      <button class="btn sm" id="saveDay">이 날 저장</button>
+      <span class="ok" id="dayMsg"></span>
+    </div>
+  </div></div>
+</section>
+
+<!-- EXPORT -->
+<section>
+  <div class="divider"></div>
+  <div class="eyebrow">제출</div>
+  <h2>기록 내보내기</h2>
+  <p class="lede">기록은 이 브라우저에 자동 저장되지만, <b>다른 기기에서는 사라집니다.</b> 매일 <b>파일로 내려받아</b> 구글 클래스룸에 제출하세요. 마지막 날 <b>전체 누적본</b>을 한 번 더 제출하면 됩니다.</p>
+  <div class="bar">
+    <button class="btn" id="dlAll">전체 기록 내려받기</button>
+    <button class="btn ghost" id="copyAll">전체 복사</button>
+    <button class="btn ghost sm" id="wipe">이 브라우저 기록 지우기</button>
+    <span class="ok" id="exportMsg"></span>
+  </div>
+</section>
+
+</div>
+
+<div id="blank" class="lede" style="background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow);padding:36px;text-align:center;color:var(--ink-3);max-width:none">
+  설계 카드를 붙여넣거나 <b>카드 없이 직접 쓰기</b>를 누르면 기록장이 열립니다.
+</div>
+
+<p style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em;padding-top:36px">
+  고급화학 팀 탐구 · 실험 기록장 &nbsp;|&nbsp; 이 브라우저에 자동 저장 · 제출은 파일 내려받기로
+</p>
+</main>
+
+<script>
+const DAYS=[
+ {d:3,label:"Day 3 · 예비실험",plot:"오늘은 <b>망하라고 주는 날</b>입니다. 신호가 잡히는지, 범위는 어디부터인지, 한 점에 몇 분 걸리는지 — 이것만 알아내면 성공입니다. 그리고 v2 질문을 개정하세요."},
+ {d:4,label:"Day 4 · 본측정 1",plot:"🔴 <b>오늘 잰 것은 오늘 그래프로.</b> 거칠어도 좋으니 축·단위가 있는 그래프 1장을 반드시 남기세요."},
+ {d:5,label:"Day 5 · 본측정 2",plot:"🔴 <b>오차 막대를 붙이세요.</b> 그리고 그 오차가 무엇의 오차인지(반복 표준편차? 기기 사양?) 말할 수 있어야 합니다. 오늘 상호 비판 세션이 있습니다."},
+ {d:6,label:"Day 6 · 본측정 3",plot:"🔴 오늘 끝에 <b>Day 7을 무엇에 쓸지</b> 선언하세요: 교차검증 / 변수 확장 / 반증 / 재현성 / 실패 복구 중 하나."},
+ {d:7,label:"Day 7 · 확장·검증",plot:"🔴 <b>핵심 그림을 확정</b>하는 날. 리포트에 들어갈 그래프 딱 1장을 고르세요."},
+ {d:8,label:"Day 8 · 마무리",plot:"오늘은 측정이 아니라 <b>조립</b>입니다. 매일 그린 그래프에서 핵심 1장을 골라 원페이지 리포트로 엮으세요."}
+];
+
+const KEY="gochem_lab_v1";
+const $=id=>document.getElementById(id);
+const esc=s=>(s||"");
+let ST={design:{}, team:"", code:"", q:{v1:"",v2:"",w2:"",v3:"",w3:""}, days:{}, curDay:3};
+
+/* ---------- storage (best-effort) ---------- */
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(ST)); }catch(e){} }
+function load(){ try{ const s=localStorage.getItem(KEY); if(s){ST=JSON.parse(s);return true;} }catch(e){} return false; }
+
+/* ---------- parse design card ---------- */
+function parseCard(txt){
+  // 줄 단위로 [라벨] 블록을 수집한다. 라벨에 물음표·특수문자가 있어도 안전하다.
+  const lines=txt.split(/\r?\n/);
+  const blocks={};
+  let cur=null;
+  for(const line of lines){
+    const m=line.match(/^\s*\[([^\]]+)\]\s*(.*)$/);
+    if(m){ cur=m[1].trim(); blocks[cur]=m[2].trim(); }
+    else if(cur!==null){ const s=line.trim(); if(s) blocks[cur]=(blocks[cur]?blocks[cur]+" ":"")+s; }
+  }
+  const grab=(label)=> (blocks[label]||"").trim();
+  const codeM=txt.match(/설계\s*코드[:：]?\s*(T\d{2}[^\n]*)/);
+  const teamM=txt.match(/팀[:：]\s*([^\n]+)/);
+  const d={
+    code: codeM?codeM[1].trim():"",
+    team: teamM?teamM[1].trim():"",
+    topic: grab("주제"),
+    observe: grab("무엇이 관찰되는가?"),
+    wall: grab("왜 설명할 수 없을까?"),
+    concept: grab("어떤 개념이 필요한가?"),
+    next: grab("다음엔 뭘 알아봐야 할까?"),
+    V: grab("변수축 V1")||grab("변수축 V2")||grab("변수축 V3")||grab("변수축 V4")||grab("변수축 V5"),
+    M: grab("방법축 M1")||grab("방법축 M2")||grab("방법축 M3")||grab("방법축 M4"),
+    P: grab("목적축 PA")||grab("목적축 PB")||grab("목적축 PC")||grab("목적축 PD"),
+    mq: grab("메타 질문"),
+    unknown: grab("아직 결과를 모르는 이유"),
+    ctrls: grab("고정할 변인"),
+    graph: grab("그릴 그래프"),
+    pilot: grab("예비실험(Day 3)에서 확인할 것"),
+    gear: grab("주요 장비")
+  };
+  // axis lines sometimes need V/M/P scan generically
+  ["변수축","방법축","목적축"].forEach((ax,i)=>{
+    const re=new RegExp("\\["+ax+"\\s*[VMP]?\\w*\\]\\s*([^\\n]+)");
+    const m=txt.match(re); if(m){ d[["V","M","P"][i]]=m[1].trim(); }
+  });
+  return d;
+}
+
+function applyDesign(d){
+  ST.design=d; ST.team=d.team||""; ST.code=d.code||"";
+  if(d.mq && !ST.q.v1) ST.q.v1=d.mq;
+  save();
+}
+
+/* ---------- render ---------- */
+function renderDesign(){
+  const d=ST.design;
+  $("teamName").textContent=ST.team||"우리 팀";
+  $("codeChip").textContent=ST.code||"— · — · — · —";
+  const rows=[
+    ["주제",d.topic],["관찰",d.observe],["막히는 점",d.wall],
+    ["개념",d.concept],["변수축",d.V],["방법축",d.M],["목적축",d.P],
+    ["그릴 그래프",d.graph],["고정할 것",d.ctrls],["예비실험",d.pilot],["장비",d.gear]
+  ].filter(r=>r[1]);
+  $("designGrid").innerHTML=rows.map(r=>`<div class="dk">${r[0]}</div><div class="dv">${esc(r[1])}</div>`).join("")
+    || `<div class="dv" style="color:var(--ink-3)">카드 없이 시작했습니다. 아래 질문과 랩노트를 직접 채우세요.</div>`;
+}
+
+function renderQ(){
+  $("q_v1").value=ST.q.v1||""; $("q_v2").value=ST.q.v2||""; $("w_v2").value=ST.q.w2||"";
+  $("q_v3").value=ST.q.v3||""; $("w_v3").value=ST.q.w3||"";
+}
+
+function renderDayTabs(){
+  $("daytabs").innerHTML=DAYS.map(x=>{
+    const filled=ST.days[x.d]&&(ST.days[x.d].did||ST.days[x.d].goal);
+    return `<button class="daytab ${x.d===ST.curDay?"on":""} ${filled?"filled":""}" data-d="${x.d}">${x.label}${filled?'<span class="dot">✓</span>':''}</button>`;
+  }).join("");
+  document.querySelectorAll(".daytab").forEach(b=>b.onclick=()=>{ saveDayFields(); ST.curDay=+b.dataset.d; renderDay(); });
+}
+
+function renderDay(){
+  const x=DAYS.find(x=>x.d===ST.curDay);
+  $("plotReminder").innerHTML=x.plot;
+  const dd=ST.days[ST.curDay]||{};
+  $("d_goal").value=dd.goal||""; $("d_did").value=dd.did||""; $("d_saw").value=dd.saw||"";
+  $("d_thought").value=dd.thought||""; $("d_fail").value=dd.fail||""; $("d_next").value=dd.next||"";
+  $("failNote").textContent = (ST.curDay>=4 && !(dd.fail||"").trim()) ? "이 칸이 비어 있습니다. 정말 아무것도 안 틀렸나요?" : "";
+  renderDayTabs();
+}
+
+function saveDayFields(){
+  ST.days[ST.curDay]={
+    goal:$("d_goal").value, did:$("d_did").value, saw:$("d_saw").value,
+    thought:$("d_thought").value, fail:$("d_fail").value, next:$("d_next").value
+  };
+  save();
+}
+function saveQFields(){
+  ST.q={v1:$("q_v1").value,v2:$("q_v2").value,w2:$("w_v2").value,v3:$("q_v3").value,w3:$("w_v3").value};
+  save();
+}
+
+function showBody(){ $("blank").style.display="none"; $("body").style.display="block"; renderDesign(); renderQ(); renderDay(); }
+
+/* ---------- export ---------- */
+function buildText(){
+  const d=ST.design, q=ST.q;
+  let t=`고급화학 팀 탐구 · 실험 기록\n`;
+  t+=`팀: ${ST.team||"(미기입)"}\n설계 코드: ${ST.code||"(없음)"}\n`;
+  t+=`\n${"=".repeat(40)}\n[ 설계 요약 ]\n`;
+  [["주제",d.topic],["관찰되는 현상",d.observe],["막히는 점",d.wall],["필요한 개념",d.concept],
+   ["변수축",d.V],["방법축",d.M],["목적축",d.P],["그릴 그래프",d.graph],["고정할 변인",d.ctrls],["장비",d.gear]]
+   .filter(r=>r[1]).forEach(r=>t+=`- ${r[0]}: ${r[1]}\n`);
+  t+=`\n${"=".repeat(40)}\n[ 메타 질문의 변천 ]\n`;
+  t+=`v1 (설계): ${q.v1||"-"}\n`;
+  t+=`v2 (예비실험 후): ${q.v2||"-"}\n     └ 왜: ${q.w2||"-"}\n`;
+  t+=`v3 (데이터 리뷰 후): ${q.v3||"-"}\n     └ 왜: ${q.w3||"-"}\n`;
+  t+=`\n${"=".repeat(40)}\n[ 날짜별 랩노트 ]\n`;
+  DAYS.forEach(x=>{
+    const dd=ST.days[x.d]; if(!dd||!(dd.goal||dd.did))return;
+    t+=`\n── ${x.label} ──\n`;
+    t+=`목표: ${dd.goal||"-"}\n`;
+    t+=`[한 것] ${dd.did||"-"}\n`;
+    t+=`[본 것] ${dd.saw||"-"}\n`;
+    t+=`[생각한 것] ${dd.thought||"-"}\n`;
+    t+=`[망한 것] ${dd.fail||"-"}\n`;
+    t+=`[내일 할 것] ${dd.next||"-"}\n`;
+  });
+  return t;
+}
+
+function download(name, txt){
+  const b=new Blob([txt],{type:"text/plain;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ---------- events ---------- */
+$("importBtn").onclick=()=>{
+  const txt=$("importBox").value.trim();
+  if(!txt){ $("importMsg").textContent="붙여넣은 내용이 없습니다."; return; }
+  const d=parseCard(txt);
+  if(!d.topic && !d.mq){ $("importMsg").textContent="설계 카드 형식을 못 읽었습니다. 그래도 직접 쓰기로 진행할 수 있습니다."; }
+  else { $("importMsg").innerHTML='<span style="color:var(--ok)">불러왔습니다.</span>'; }
+  applyDesign(d); showBody();
+};
+$("skipBtn").onclick=()=>{ ST.design={}; save(); showBody(); };
+$("saveDay").onclick=()=>{ saveDayFields(); $("dayMsg").textContent="저장했습니다."; setTimeout(()=>$("dayMsg").textContent="",2000); renderDayTabs(); };
+["q_v1","q_v2","w_v2","q_v3","w_v3"].forEach(id=>$(id).addEventListener("input",saveQFields));
+["d_goal","d_did","d_saw","d_thought","d_fail","d_next"].forEach(id=>$(id).addEventListener("input",()=>{
+  saveDayFields();
+  if(id==="d_fail"){ const dd=ST.days[ST.curDay]||{}; $("failNote").textContent=(ST.curDay>=4&&!(dd.fail||"").trim())?"이 칸이 비어 있습니다. 정말 아무것도 안 틀렸나요?":""; }
+}));
+$("dlAll").onclick=()=>{
+  saveDayFields(); saveQFields();
+  const name=`실험기록_${(ST.team||"팀").replace(/\s/g,"")}_${ST.code.replace(/[·\s]/g,"-")||"기록"}.txt`;
+  download(name, buildText());
+  $("exportMsg").textContent="내려받았습니다."; setTimeout(()=>$("exportMsg").textContent="",2200);
+};
+$("copyAll").onclick=async()=>{
+  saveDayFields(); saveQFields();
+  try{ await navigator.clipboard.writeText(buildText()); $("exportMsg").textContent="복사했습니다."; }
+  catch{ $("exportMsg").textContent="복사 실패 — 내려받기를 쓰세요."; }
+  setTimeout(()=>$("exportMsg").textContent="",2200);
+};
+$("wipe").onclick=()=>{
+  if(!confirm("이 브라우저에 저장된 기록을 모두 지웁니다. 계속할까요?"))return;
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  location.reload();
+};
+
+/* ---------- init ---------- */
+if(load() && (ST.design && (ST.design.topic||Object.keys(ST.days).length||ST.q.v1))){
+  showBody();
+}
+</script>
+<script>
+/* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */
+(function(){
+  if(window.self===window.top) return;
+  document.documentElement.classList.add('embedded');
+  var s=document.createElement('style');
+  s.textContent=".gtb{display:none!important}"+
+    "header{top:0!important}"+
+    ".side{top:80px!important}"+
+    "nav .nlinks a.cross{display:none!important}";
+  document.head.appendChild(s);
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.t==='goFrag'&&e.data.frag){
+      var el=document.getElementById(e.data.frag);
+      if(el) el.scrollIntoView({behavior:'smooth'});
+      else location.hash=e.data.frag;
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>고급화학 팀 탐구 설계실</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+/* ===== Apple-inspired design language ===== */
+:root{
+  --paper:#f5f5f7;
+  --paper-2:#ffffff;
+  --ink:#1d1d1f;
+  --ink-2:#424245;
+  --ink-3:#86868b;
+  --rule:#e8e8ed;
+  --rule-2:#f0f0f2;
+  --tint:#0071e3;
+  --tint-2:#0077ed;
+  --ok:#1d8a4e;
+  --warn:#d0342c;
+  --risk:#bf5000;
+  --shadow:0 4px 20px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 30px rgba(0,0,0,0.09);
+  --r:18px;
+  --r-sm:12px;
+  --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard Variable",Pretendard,system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --topic:#0071e3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1.5;letter-spacing:-0.01em}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+header{background:rgba(245,245,247,0.8);backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);position:sticky;top:50px;z-index:40;border-bottom:1px solid var(--rule)}
+.hbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:11px}
+.brand h1{font-size:19px;font-weight:600;letter-spacing:-0.02em}
+.brand span{font-size:12px;color:var(--ink-3);letter-spacing:0}
+.code-chip{font-family:var(--mono);font-weight:600;font-size:13.5px;letter-spacing:0.02em;
+  background:var(--ink);color:#fff;padding:8px 15px;border-radius:980px;display:flex;align-items:center;gap:9px}
+.code-chip small{font-weight:400;font-size:10px;letter-spacing:0.02em;opacity:.55}
+.code-chip.empty{background:#e8e8ed;color:var(--ink-3)}
+
+.rail{display:flex;gap:8px;padding:14px 0 2px;overflow-x:auto}
+.rail button{flex:1;min-width:150px;background:var(--paper-2);border:none;border-radius:var(--r-sm);
+  font-family:var(--sans);text-align:left;padding:12px 15px;cursor:pointer;display:flex;align-items:center;gap:11px;
+  color:var(--ink-3);transition:all .2s ease;box-shadow:var(--shadow)}
+.rail button:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.rail button:disabled{cursor:not-allowed;opacity:.5;box-shadow:none;background:#ececef}
+.rail button.on{color:var(--ink);box-shadow:0 0 0 2px var(--tint),var(--shadow)}
+.rail button.on .rnum{background:var(--tint);color:#fff}
+.rail .rnum{font-size:12px;font-weight:600;width:25px;height:25px;flex:none;border-radius:50%;
+  background:#e8e8ed;color:var(--ink-3);display:grid;place-items:center;transition:.2s}
+.rail .rtxt{font-size:13px;font-weight:500;white-space:nowrap}
+.rail .rdone{margin-left:auto;color:var(--ok);font-weight:700;font-size:13px}
+
+.panel{display:none;padding:48px 0 100px}
+.panel.on{display:block;animation:rise .45s cubic-bezier(.22,.61,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:13px;letter-spacing:0;color:var(--tint);margin-bottom:10px;font-weight:600}
+.panel h2{font-size:34px;font-weight:700;letter-spacing:-0.03em;margin-bottom:11px;line-height:1.1}
+.lede{color:var(--ink-2);font-size:17px;line-height:1.6;max-width:680px;margin-bottom:34px}
+.lede b{color:var(--ink);font-weight:600}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.tcard{background:var(--paper-2);cursor:pointer;text-align:left;font-family:var(--sans);border:none;
+  border-radius:var(--r);display:flex;flex-direction:column;transition:transform .25s ease,box-shadow .25s ease;
+  position:relative;box-shadow:var(--shadow);overflow:hidden}
+.tcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+.tcard.on{box-shadow:0 0 0 2.5px var(--tint),var(--shadow-lg)}
+.tcard.on::after{content:"✓ 선택됨";position:absolute;top:14px;right:14px;background:var(--tint);color:#fff;
+  font-size:11px;font-weight:600;padding:4px 11px;border-radius:980px}
+.band{height:5px;background:var(--tc)}
+.tbody{padding:22px 24px 24px}
+.tnum{font-size:12px;font-weight:600;color:var(--tc);letter-spacing:0}
+.tname{font-size:22px;font-weight:700;letter-spacing:-0.02em;margin:3px 0 16px}
+.qline{margin-bottom:13px}
+.qline em{display:block;font-style:normal;font-size:12.5px;font-weight:600;color:var(--tc);margin-bottom:3px}
+.qline span{display:block;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.qline b{font-weight:600;color:var(--ink)}
+.tmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;padding-top:15px;border-top:1px solid var(--rule)}
+.tag{font-size:11.5px;background:#f0f0f2;padding:4px 10px;color:var(--ink-3);border-radius:980px;font-weight:500}
+.tag.unit{background:color-mix(in srgb,var(--tc) 12%,white);color:var(--tc)}
+
+.axes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:30px}
+.ax{background:var(--paper-2);border-radius:var(--r);display:flex;flex-direction:column;box-shadow:var(--shadow);overflow:hidden}
+.axh{padding:18px 20px 15px}
+.axh .k{font-size:12px;font-weight:600;letter-spacing:0;color:var(--tint)}
+.axh .t{font-size:18px;font-weight:700;letter-spacing:-0.02em;margin-top:2px}
+.axh .q{font-size:12.5px;color:var(--ink-3);margin-top:3px}
+.axb{padding:8px 14px 16px;display:flex;flex-direction:column;gap:8px}
+.chip{background:#f5f5f7;border:2px solid transparent;cursor:pointer;font-family:var(--sans);text-align:left;
+  padding:12px 14px;border-radius:var(--r-sm);transition:.18s;color:var(--ink-2);display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45}
+.chip:hover{background:#eeeef0}
+.chip.on{border-color:var(--tint);background:color-mix(in srgb,var(--tint) 6%,white);color:var(--ink)}
+.chip .ck{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--ink-3);flex:none;padding-top:1px}
+.chip.on .ck{color:var(--tint)}
+.chip b{display:block;font-weight:600;font-size:14px}
+.chip small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px;line-height:1.45}
+.chip.on small{color:var(--ink-2)}
+
+.assembler{background:var(--paper-2);border-radius:var(--r);margin-bottom:26px;box-shadow:var(--shadow);overflow:hidden}
+.asm-h{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.asm-h span:first-child{font-size:12px;letter-spacing:0;color:var(--ink-3);font-weight:600}
+.asm-b{padding:26px 22px}
+.tmpl{font-size:20px;line-height:1.8;letter-spacing:-0.02em;color:var(--ink-3);font-weight:500}
+.slot{display:inline-block;color:var(--tint);font-weight:600;padding:0 2px}
+.slot.blank{color:var(--ink-3);font-weight:500}
+textarea{width:100%;font-family:var(--sans);font-size:16px;line-height:1.65;color:var(--ink);
+  border:2px solid var(--rule);border-radius:var(--r-sm);background:#fff;padding:15px;resize:vertical;min-height:108px;letter-spacing:-0.01em}
+textarea:focus{outline:none;border-color:var(--tint)}
+input[type=text]{width:100%;font-family:var(--sans);font-size:14.5px;color:var(--ink);
+  border:2px solid var(--rule);border-radius:var(--r-sm);background:#fff;padding:11px 14px}
+input[type=text]:focus{outline:none;border-color:var(--tint)}
+.flab{font-size:13px;font-weight:600;color:var(--ink-2);margin-bottom:8px;display:block}
+.flab em{font-style:normal;font-weight:400;color:var(--ink-3)}
+
+.check{background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.check-h{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--rule)}
+.check-h b{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.check-h .cnt{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink-3)}
+.check-h .cnt.pass{color:var(--ok)}
+.ci{display:flex;gap:13px;padding:16px 22px;border-bottom:1px solid var(--rule-2);align-items:flex-start;cursor:pointer;transition:.15s}
+.ci:last-child{border-bottom:none}
+.ci:hover{background:#fafafb}
+.box{width:22px;height:22px;flex:none;border:2px solid #d2d2d7;border-radius:50%;margin-top:1px;
+  display:grid;place-items:center;font-size:12px;color:transparent;font-weight:700;transition:.18s}
+.ci.on .box{background:var(--ok);border-color:var(--ok);color:#fff}
+.ci-t{flex:1}
+.ci-t b{display:block;font-size:14.5px;font-weight:600}
+.ci-t small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:3px;line-height:1.5}
+.ci.on .ci-t b{color:var(--ok)}
+.gate{padding:18px 22px;background:#fef6f5;border-top:1px solid var(--rule)}
+.gate .flab{color:var(--warn)}
+
+.sec{background:var(--paper-2);border-radius:var(--r);margin-bottom:20px;box-shadow:var(--shadow);overflow:hidden}
+.sec-h{padding:17px 22px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--rule)}
+.sec-h b{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.sec-h span{font-size:12.5px;color:var(--ink-3)}
+.sec-b{padding:18px 22px}
+.pills{display:flex;flex-wrap:wrap;gap:9px}
+.pill{background:#f5f5f7;border:2px solid transparent;cursor:pointer;font-family:var(--sans);
+  padding:9px 16px;font-size:14px;font-weight:500;color:var(--ink-2);transition:.18s;border-radius:980px}
+.pill:hover{background:#eeeef0}
+.pill.on{border-color:var(--tint);background:color-mix(in srgb,var(--tint) 6%,white);color:var(--ink)}
+.plots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plot{background:#f5f5f7;border:2px solid transparent;cursor:pointer;font-family:var(--sans);text-align:left;padding:17px;transition:.18s;border-radius:var(--r-sm)}
+.plot:hover{background:#eeeef0}
+.plot.on{border-color:var(--tint);background:color-mix(in srgb,var(--tint) 6%,white)}
+.axis-line{font-family:var(--mono);font-size:11.5px;font-weight:600;color:var(--tint);letter-spacing:0}
+.plot b{display:block;font-size:15px;font-weight:600;margin-top:6px;letter-spacing:-0.01em}
+.plot small{display:block;color:var(--ink-3);font-size:12.5px;margin-top:5px;line-height:1.5}
+.plot.on small{color:var(--ink-2)}
+.risk{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--rule-2);font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.risk:last-of-type{border-bottom:none}
+.risk i{font-style:normal;color:var(--risk);font-weight:700;flex:none;font-family:var(--mono);font-size:12.5px;padding-top:1px}
+.safety{background:#fef6f5;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#a03530;line-height:1.6;border-radius:var(--r-sm)}
+.safety b{font-weight:700}
+
+.out{background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow-lg);overflow:hidden}
+.out-h{background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.out-h b{font-size:16px;font-weight:600;letter-spacing:-0.01em}
+.out-h .oc{font-family:var(--mono);font-size:14.5px;font-weight:600;letter-spacing:0.02em}
+.out-b{padding:24px}
+.row{display:flex;gap:16px;padding:13px 0;border-bottom:1px solid var(--rule-2);font-size:14px;align-items:flex-start}
+.row:last-child{border-bottom:none}
+.row .rk{font-size:12px;font-weight:600;color:var(--ink-3);width:90px;flex:none;padding-top:2px}
+.row .rv{flex:1;line-height:1.6}
+.row .rv em{font-style:normal;color:var(--ink-2)}
+
+.bar{display:flex;gap:11px;margin-top:30px;flex-wrap:wrap;align-items:center}
+.btn{font-family:var(--sans);font-size:15px;font-weight:500;cursor:pointer;padding:12px 24px;
+  border:none;background:var(--tint);color:#fff;transition:.2s;border-radius:980px;letter-spacing:-0.01em}
+.btn:hover:not(:disabled){background:var(--tint-2);transform:scale(1.02)}
+.btn:disabled{background:#d2d2d7;color:#fff;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--tint);box-shadow:inset 0 0 0 1.5px #d2d2d7}
+.btn.ghost:hover{background:#f5f5f7;box-shadow:inset 0 0 0 1.5px var(--tint)}
+.warnmsg{font-size:13.5px;color:var(--ink-3);font-weight:400}
+
+.split{display:grid;grid-template-columns:1fr 350px;gap:22px;align-items:start}
+.side{background:var(--paper-2);border-radius:var(--r);position:sticky;top:180px;box-shadow:var(--shadow);overflow:hidden}
+.side-h{padding:16px 20px;font-size:14px;font-weight:600;letter-spacing:-0.01em;border-bottom:1px solid var(--rule)}
+.side-b{padding:18px 20px}
+.side-b p{font-size:13px;color:var(--ink-2);line-height:1.65;margin-bottom:14px}
+.side-b p:last-child{margin-bottom:0}
+.side-b b{color:var(--ink-3);font-weight:600;display:block;font-size:11.5px;letter-spacing:0;margin-bottom:3px}
+.divider{height:1px;background:var(--rule);margin:38px 0}
+:focus-visible{outline:2.5px solid var(--tint);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(max-width:960px){.axes,.plots{grid-template-columns:1fr}.split{grid-template-columns:1fr}.side{position:static}}
+@media(max-width:640px){.wrap{padding:0 18px}.panel h2{font-size:27px}.tmpl{font-size:17px;line-height:1.9}}
+
+/* ===== global tool switcher ===== */
+.gtb{position:sticky;top:0;z-index:60;background:rgba(245,245,247,.85);
+  backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--rule)}
+.gtb-in{max-width:1180px;margin:0 auto;padding:0 22px;display:flex;align-items:center;
+  justify-content:space-between;height:50px;gap:14px}
+.gtb-home{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;
+  text-decoration:none;color:var(--ink)}
+.gtb-home svg{color:var(--tint,#0071e3)}
+.gtb-nav{display:flex;gap:3px}
+.gtb-nav a{font-size:13px;color:var(--ink-2);text-decoration:none;padding:6px 13px;
+  border-radius:980px;transition:.16s;white-space:nowrap}
+.gtb-nav a:hover{background:#e8e8ed;color:var(--ink)}
+.gtb-nav a.here{background:var(--ink);color:#fff}
+@media(max-width:720px){.gtb-nav a{padding:6px 9px;font-size:12px}.gtb-home span{display:none}}
+</style>
+</head>
+<body>
+
+<div class="gtb"><div class="gtb-in">
+  <a href="index.html" class="gtb-home">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-4 9a2 2 0 002 3h8a2 2 0 002-3l-4-9V3"/></svg>
+    <span>고급화학 탐구</span>
+  </a>
+  <nav class="gtb-nav"><a href="index.html">홈</a><a href="sim.html">시뮬레이터</a><a href="design.html" class="here">설계실</a><a href="lab.html">기록장</a><a href="teacher.html">현황판</a></nav>
+</div></div>
+
+<header>
+  <div class="wrap">
+    <div class="hbar">
+      <div class="brand"><h1>고급화학 팀 탐구 설계실</h1><span>Team Inquiry Design</span></div>
+      <div class="code-chip empty" id="codeChip"><small>설계 코드</small><span id="codeVal">— · — · — · —</span></div>
+    </div>
+  </div>
+  <div class="rail" id="rail">
+    <button data-s="1" class="on"><span class="rnum">1</span><span class="rtxt">주제 고르기</span><span class="rdone" id="d1"></span></button>
+    <button data-s="2" disabled><span class="rnum">2</span><span class="rtxt">분화 3축 정하기</span><span class="rdone" id="d2"></span></button>
+    <button data-s="3" disabled><span class="rnum">3</span><span class="rtxt">메타 질문 빚기</span><span class="rdone" id="d3"></span></button>
+    <button data-s="4" disabled><span class="rnum">4</span><span class="rtxt">실험 다지기</span><span class="rdone" id="d4"></span></button>
+    <button data-s="5" disabled><span class="rnum">5</span><span class="rtxt">설계 카드</span></button>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="panel on" data-p="1">
+  <div class="eyebrow">Step 1 — 주제</div>
+  <h2>어떤 질문에 부딪혀 볼 것인가</h2>
+  <p class="lede">12개 주제 모두 <b>화학 1·2의 개념으로는 답이 막히는 지점</b>을 하나씩 품고 있습니다. 카드의 <b>"왜 설명할 수 없을까?"</b>를 읽고, 그 물음이 가장 답답하게 느껴지는 주제를 고르세요. 답을 이미 아는 주제는 고르지 마세요.</p>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section class="panel" data-p="2">
+  <div class="eyebrow">Step 2 — 분화 3축</div>
+  <h2>같은 주제, 다른 질문</h2>
+  <p class="lede">축 세 개를 정하면 질문이 갈라집니다. <b>같은 주제를 고른 다른 팀과 최소 한 축은 반드시 달라야 합니다.</b> 세 축을 고르면 우측 상단에 설계 코드가 생깁니다. <b>코드가 겹치면 같은 탐구입니다.</b></p>
+  <div class="axes">
+    <div class="ax"><div class="axh"><div class="k">AXIS V — 변수축</div><div class="t">무엇을 바꾸는가</div><div class="q">조작 변인 · 하나만</div></div><div class="axb" id="axV"></div></div>
+    <div class="ax"><div class="axh"><div class="k">AXIS M — 방법축</div><div class="t">무엇으로 재는가</div><div class="q">측정 수단 · 하나만</div></div><div class="axb" id="axM"></div></div>
+    <div class="ax"><div class="axh"><div class="k">AXIS P — 목적축</div><div class="t">왜 재는가</div><div class="q">탐구의 지향 · 하나만 · 모든 주제 공통</div></div><div class="axb" id="axP"></div></div>
+  </div>
+  <div class="bar"><button class="btn" id="toStep3" disabled>메타 질문 빚으러 가기 →</button><span class="warnmsg" id="ax-warn">세 축을 모두 고르세요.</span></div>
+</section>
+
+<section class="panel" data-p="3">
+  <div class="eyebrow">Step 3 — 메타 질문</div>
+  <h2>답을 모르는 질문만 통과한다</h2>
+  <p class="lede">아래 틀은 <b>출발점일 뿐</b>입니다. 그대로 쓰지 말고 팀의 말로 다시 쓰세요. 좋은 메타 질문은 <b>해봐야 아는 질문</b>입니다.</p>
+  <div class="split">
+    <div>
+      <div class="assembler">
+        <div class="asm-h"><span>생성된 틀</span><span id="asmCode" style="font-family:var(--mono);font-weight:700;color:var(--ink)"></span></div>
+        <div class="asm-b"><div class="tmpl" id="tmpl"></div></div>
+      </div>
+      <label class="flab">우리 팀의 메타 질문 <em>— 위 틀을 고쳐 쓰세요</em></label>
+      <textarea id="mq" placeholder="예) Δ를 결정하는 것은 리간드인가? 리간드 종류만으로 색을 예측하는 서열을 우리 손으로 만들 수 있는가?"></textarea>
+      <div style="margin-top:22px">
+        <div class="check">
+          <div class="check-h"><b>통과 조건</b><span class="cnt" id="ccnt">0 / 5</span></div>
+          <div id="checks"></div>
+          <div class="gate">
+            <label class="flab">3번 조건 — 우리가 <u>결과를 아직 모르는 이유</u>를 쓰세요</label>
+            <input type="text" id="unknown" placeholder="예) 리간드 세기 순서는 알지만, Δ 차이가 색으로 보일 만큼 클지는 재봐야 안다">
+          </div>
+        </div>
+      </div>
+      <div class="bar"><button class="btn" id="toStep4" disabled>실험 다지러 가기 →</button><span class="warnmsg" id="mq-warn"></span></div>
+    </div>
+    <aside class="side">
+      <div class="side-h">이 주제가 던지는 질문</div>
+      <div class="side-b" id="sideWall"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="panel" data-p="4">
+  <div class="eyebrow">Step 4 — 실험 다지기</div>
+  <h2>Day 3에 무너지지 않으려면</h2>
+  <p class="lede">여기서 대충 넘어간 팀은 <b>예비실험 날 전부 무너집니다.</b> 무엇을 고정할지, 어떤 그래프를 그릴지, 어디서 깨질지를 지금 정하세요.</p>
+  <div id="safeBox"></div>
+  <div class="sec">
+    <div class="sec-h"><b>고정할 것</b><span>조작 변인 하나 말고는 전부 고정입니다. 최소 2개를 고르세요.</span></div>
+    <div class="sec-b"><div class="pills" id="ctrls"></div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><b>그릴 그래프</b><span>어떤 그래프를 그릴지 모르면, 무엇을 재야 할지도 모릅니다.</span></div>
+    <div class="sec-b"><div class="plots" id="plots"></div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-h"><b>깨질 지점</b><span>이 주제에서 매년 팀이 무너지는 자리입니다.</span></div>
+    <div class="sec-b" id="risks"></div>
+  </div>
+  <label class="flab">예비실험(Day 3)에서 <u>반드시 확인할 것</u> <em>— 위 '깨질 지점'을 읽고 쓰세요</em></label>
+  <input type="text" id="pilot" placeholder="예) 리간드를 몇 배 과량 넣어야 원래 수화 착물 피크가 사라지는지부터 확인한다">
+  <div class="bar"><button class="btn" id="toStep5" disabled>설계 카드 만들기 →</button><span class="warnmsg" id="p-warn"></span></div>
+</section>
+
+<section class="panel" data-p="5">
+  <div class="eyebrow">Step 5 — 제출</div>
+  <h2>설계 카드</h2>
+  <p class="lede">복사하거나 파일로 내려받아 제출하세요. 다른 팀과 <b>설계 코드가 같으면 중복</b>입니다 — 축 하나를 바꿔 다시 오세요.</p>
+  <div class="out">
+    <div class="out-h"><b id="outTitle">탐구 설계 카드</b><span class="oc" id="outCode"></span></div>
+    <div class="out-b" id="outBody"></div>
+  </div>
+  <div class="bar">
+    <input type="text" id="team" placeholder="팀 이름 (예: 3팀 착화)" style="width:220px">
+    <button class="btn" id="copyBtn">클립보드에 복사</button>
+    <button class="btn ghost" id="dlBtn">파일로 내려받기</button>
+    <button class="btn ghost" id="resetBtn">처음부터 다시</button>
+    <span class="warnmsg" id="okmsg" style="color:var(--ok)"></span>
+  </div>
+</section>
+
+<div class="divider"></div>
+<p style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em;padding-bottom:40px">
+  고급화학 · 8일 블록타임 팀 탐구 · 설계 코드 = 주제 · 변수 · 방법 · 목적 &nbsp;|&nbsp; 개별 심화 탐구는 팀 결과가 나온 뒤 따로 부여됩니다
+</p>
+</main>
+
+<script>
+const PURPOSE=[
+ {id:"A",t:"법칙 구축",d:"데이터에서 서열·경향성을 우리 손으로 만든다. 산출물 = 우리가 만든 계열표.",v:"우리만의 서열·경향성을 구축"},
+ {id:"B",t:"예측 검증",d:"이론값을 먼저 계산해두고 실측과 대조한다. 산출물 = 이론과 실측의 격차.",v:"이론 예측과 실측의 격차를 규명"},
+ {id:"C",t:"방법 비판",d:"측정법이 언제 거짓말하는지 찾는다. 산출물 = \"이 방법은 ○○ 조건에서 실패한다\".",v:"측정 방법이 무너지는 조건을 규명"},
+ {id:"D",t:"응용 검증",d:"실제 맥락(약·공정·생체)의 근거를 평가한다. 산출물 = 근거 있는 판단·제안.",v:"실제 응용의 근거를 평가"}
+];
+
+const T=[
+{n:1,name:"색",color:"#3B4FC4",unit:"I 물질의 구조",gear:"분광광도계",obs:"흡수 파장 λmax와 Δ",
+ hook:"무수 CuSO₄는 흰색인데, 물만 닿으면 파랗다.",
+ wall:"화1·2는 \"전이금속은 색을 띤다\"에서 멈춘다. 왜 하필 그 파란색인지는 설명하지 못한다.",
+ weapon:"결정장 분리 에너지 Δ · 분광화학적 계열 · 보색",
+ next:"리간드를 바꾸면 Δ가 달라진다면, 리간드를 세기 순으로 줄 세울 수 있을까? 그 순서를 우리 손으로 만들 수 있을까?",
+ V:[["리간드 종류","H₂O / NH₃ / en / Cl⁻ / DMSO"],["금속 종류","Cr³⁺ / Fe³⁺ / Co²⁺ / Ni²⁺ / Cu²⁺"],["산화수","같은 금속의 +2 vs +3"],["배위수·기하","정팔면체 vs 사면체"],["용매","물 / 에탄올 / DMSO"]],
+ M:[["분광광도계 λmax","흡수 최대 파장 → Δ를 kJ/mol로 환산"],["색 좌표 분석","사진 RGB → 보색 → 흡수대 역산"],["결정장 계산","시뮬레이션으로 Δ 예측"]],
+ C:["금속 이온의 몰농도","용액 pH","큐벳·경로 길이","측정 온도","리간드 과량 비율"],
+ G:[["리간드 (계열 순)","Δ (kJ/mol)","계열이 단조 증가하면 성공. 어긋나는 리간드가 있다면 그게 발견이다."],["파장 λ (nm)","흡광도 A","착물별 스펙트럼을 겹쳐 그린다. λmax 이동이 한눈에 보인다."]],
+ R:["착물이 덜 형성되어 원래 수화 착물의 피크가 섞인다. → 리간드를 몇 배 과량 넣어야 하는지 예비실험에서 확정하라.","d–d 흡수대는 넓고 뭉툭해서 사람마다 λmax를 다르게 읽는다. → 피크 판정 기준을 먼저 문서로 정하라."]},
+
+{n:2,name:"자성",color:"#4A7FA8",unit:"I 물질의 구조",gear:"정밀저울 · 자석",obs:"홀전자 수와 자기 감수율",
+ hook:"[Fe(H₂O)₆]²⁺는 자석에 끌리는데, 같은 Fe²⁺인 [Fe(CN)₆]⁴⁻는 밀린다. 리간드만 바뀌었을 뿐인데.",
+ wall:"화1·2의 옥텟·루이스 구조로는 O₂의 상자성조차 설명 못 한다. 하물며 같은 금속이 리간드에 따라 자성이 갈리는 건 손도 못 댄다.",
+ weapon:"분자 오비탈 이론 · 결정장 갈라짐 · 고스핀/저스핀 · μ_eff",
+ next:"리간드가 홀전자 수를 바꾼다면, 어떤 리간드에서 스핀이 뒤집힐까? 색(Δ)만 보고도 자성을 예측할 수 있을까?",
+ V:[["리간드 세기","약한장 vs 강한장"],["d 전자 수","Cr³⁺(d³) / Fe³⁺(d⁵) / Co²⁺(d⁷) / Ni²⁺(d⁸)"],["온도","스핀 상태의 온도 의존성"],["산화수","Fe²⁺ vs Fe³⁺"]],
+ M:[["자작 구이(Gouy) 저울","자기장 속 겉보기 질량 변화 → 자기 감수율"],["분광법 간접 판정","Δ를 재고 짝지음 에너지 P와 비교"],["결정장·MO 계산","시뮬레이션으로 홀전자 수 예측"]],
+ C:["시료 질량과 충전 밀도","자석–시료 거리","온도","시료의 건조 상태","저울 영점"],
+ G:[["d 전자 수","μ_eff (BM)","spin-only 예측선 위에 실측점을 얹는다. 벗어나면 왜인지 따진다."],["Δ / P 비","홀전자 수","고스핀–저스핀이 뒤집히는 경계를 찾는다."]],
+ R:["자기력이 저울 분해능보다 작아 신호가 안 잡힌다. → 예비실험에서 신호 크기부터 확인하라. 안 잡히면 즉시 시뮬레이션으로 전환.","시료가 습기를 먹으면 질량 변화가 자기력으로 오인된다. → 건조·밀폐 필수."],
+ safe:"이 주제는 <b>실험 실패 확률이 가장 높습니다.</b> 처음부터 '실험 반 + 시뮬레이션 반'으로 설계하고, 자기력 신호가 안 잡히면 미련 없이 계산으로 넘어가세요. 실패를 정직하게 기록한 팀이 더 좋은 전시물을 냅니다."},
+
+{n:3,name:"킬레이트 안정도",color:"#7B4B9E",unit:"I · III · IV",gear:"분광광도계 · pH 센서",obs:"형성 상수 Kf",
+ hook:"EDTA는 납을 잡는다. 그런데 왜 필수 미네랄인 Ca·Zn은 안 뺏어가나?",
+ wall:"화1·2에는 \"안정하다\"를 재는 도구 자체가 없다. 크기를 말할 수 없다.",
+ weapon:"형성 상수 Kf · 킬레이트 효과 · ΔG = ΔH − TΔS · 조건부 안정도 상수",
+ next:"킬레이트가 더 안정하다면, 그 이유는 엔탈피(ΔH)일까 엔트로피(ΔS)일까? 온도를 바꿔 재면 둘을 갈라낼 수 있을까?",
+ V:[["치아수","NH₃ / en / dien / trien"],["킬레이트 고리 크기","en(5원) vs 1,3-pn(6원)"],["금속 종류","Cu²⁺ / Zn²⁺ / Ni²⁺ / Ca²⁺"],["pH","조건부 안정도 상수의 pH 의존성"],["온도","van't Hoff로 ΔH·ΔS 분리"]],
+ M:[["분광 Job's method","연속변화법 → 결합비와 Kf"],["전위차(Nernst)","전극 전위 이동에서 Kf 역산"],["pH 적정","경쟁 평형으로 Kf 산출"]],
+ C:["금속 총 농도","이온 세기","pH (완충 필수)","온도","측정 파장"],
+ G:[["치아수 (1·2·3·4)","log Kf","킬레이트 효과의 크기가 계단으로 보인다."],["1/T (K⁻¹)","ln K","기울기 = −ΔH/R, 절편 = ΔS/R. 엔탈피와 엔트로피가 분리된다."]],
+ R:["pH가 흔들리면 Kf가 통째로 바뀐다. → 완충 용액 없이는 시작도 하지 마라.","Job's method는 Kf가 작으면 꼭짓점이 뭉개져 배위수를 틀리게 준다. → 예비실험에서 꼭짓점이 뾰족한지 먼저 확인하라."],
+ safe:"<b>납(Pb)·카드뮴(Cd)은 절대 사용 금지.</b> Cu²⁺·Zn²⁺·Ni²⁺로 대체하고, 실제 Pb의 자리는 문헌값과 시뮬레이션으로 추론하세요."},
+
+{n:4,name:"흡광 세기",color:"#1B3A6B",unit:"I 물질의 구조",gear:"분광광도계",obs:"몰흡광계수 ε",
+ hook:"같은 농도인데 어떤 용액은 연하고 어떤 용액은 100배 진하다.",
+ wall:"화1·2는 Beer–Lambert의 ε을 그냥 상수로 준다. ε 자체가 왜 다른지는 묻지 않는다.",
+ weapon:"라포르트 선택 규칙 · d–d 전이 vs 전하이동(CT) 전이 · 몰흡광계수 ε",
+ next:"ε이 100배 차이 난다면, 그 경계는 전이의 종류일까 대칭성일까? 어떤 전이가 강한 색을 만들까?",
+ V:[["전이 유형","d–d 전이 vs 전하이동 전이"],["대칭성","정팔면체 vs 사면체"],["금속·리간드 조합","ε을 키우는 조합 탐색"],["농도 범위","저농도 ~ 고농도"]],
+ M:[["ε 정량","검정곡선의 기울기에서 ε"],["Beer 법칙 선형성 검사","고농도에서의 이탈 추적"],["Hückel MO 계산","공액계 HOMO–LUMO 간격 예측"]],
+ C:["경로 길이(큐벳)","용매","측정 파장","기기 영점·기준 용액","온도"],
+ G:[["농도 c (M)","흡광도 A","기울기 = ε. 직선에서 벗어나는 지점이 Beer 법칙의 한계다."],["착물 종류","log ε","d–d와 CT가 100배 차이로 갈라진다."]],
+ R:["흡광도가 2를 넘으면 기기가 포화되어 거짓 직선을 준다. → 희석 계열부터 만들어라.","혼탁·산란이 흡광으로 잡힌다. → 여과하거나 원심분리하라."]},
+
+{n:5,name:"산의 세기",color:"#B5772A",unit:"IV 화학 평형",gear:"pH 센서",obs:"pKa",
+ hook:"AlCl₃ 수용액은 산성이다. H가 하나도 없는데.",
+ wall:"화1·2의 \"산 = H⁺를 내놓는 물질\"이 여기서 무너진다. Ka는 그냥 암기값이다.",
+ weapon:"유도 효과 · 공명 안정화 · 전하/반지름 비 · 금속 이온 가수분해",
+ next:"H가 없는 금속 이온이 산성이라면, 산도는 무엇이 결정할까? 전하와 반지름만으로 pKa를 예측할 수 있을까?",
+ V:[["치환기","Cl 개수·위치 (아세트산 유도체)"],["금속 이온","Al³⁺ / Fe³⁺ / Cu²⁺ / Na⁺의 전하·반지름"],["용매","물 / 에탄올 혼합"],["이온 세기","활동도 효과"]],
+ M:[["전위차 적정","적정 곡선의 반당량점 pH = pKa"],["분광 적정","발색 변화로 이온화도 추적"],["전도도","이온화도 간접 측정"]],
+ C:["산의 초기 농도","이온 세기","온도","적정액 표준화","교반 속도"],
+ G:[["적정액 부피 (mL)","pH","반당량점을 읽으면 pKa가 나온다."],["전하/반지름 비 z/r","pKa","금속 이온 산도가 하나의 선 위에 놓이는지 본다."]],
+ R:["산이 너무 묽으면 당량점이 뭉개져 pKa를 못 읽는다. → 농도 하한을 예비실험에서 잡아라.","금속 이온은 가수분해로 수산화물 침전을 만든다. → 침전이 시작되는 pH를 먼저 확인하라."]},
+
+{n:6,name:"자발성",color:"#2E8A80",unit:"III 변화와 에너지",gear:"온도 센서 · 열량계",obs:"ΔH와 ΔS",
+ hook:"콜드팩은 차가워진다. 흡열인데도 저절로 일어난다.",
+ wall:"화1·2가 심는 최악의 오개념 — \"발열이면 자발적\". 이 문장은 틀렸다.",
+ weapon:"엔트로피 · ΔG = ΔH − TΔS · 헤스 법칙",
+ next:"흡열인데도 저절로 일어난다면, 무엇이 반응을 밀어붙일까? 엔트로피(ΔS)가 얼마나 커야 흡열을 이길까?",
+ V:[["염 종류","NH₄NO₃ / CaCl₂ / KNO₃ / NaOH"],["농도","용해 엔탈피의 농도 의존성"],["온도","자발성이 뒤집히는 온도"],["용매","물 / 에탄올"]],
+ M:[["자작 열량계","온도 센서로 ΔH 직접 측정"],["평형 상수 → ΔG","K를 재서 ΔG 역산"],["헤스 법칙 간접 계산","경로를 나눠 ΔH 합성"]],
+ C:["물의 양","단열 조건(용기)","교반 속도","염의 입자 크기","초기 수온"],
+ G:[["시간 (s)","온도 (°C)","외삽으로 열 손실을 보정한 진짜 ΔT를 얻는다."],["ΔH (kJ/mol)","ΔS (J/mol·K)","자발성 사분면 위에 각 염을 찍는다."]],
+ R:["열량계가 열을 새면 ΔH가 작게 나온다. → 열량계 상수를 먼저 보정하지 않으면 모든 값이 틀린다.","용해가 느려 최저/최고 온도를 놓친다. → 시간–온도 곡선을 통째로 기록하고 외삽하라."]},
+
+{n:7,name:"평형의 이동",color:"#C2457F",unit:"III · IV",gear:"분광광도계 · 온도 센서",obs:"평형 상수 K(T)",
+ hook:"코발트 용액은 뜨거우면 파랗고 차가우면 분홍이다. 르샤틀리에는 \"얼마나\"를 말해주지 않는다.",
+ wall:"화1·2는 르샤틀리에로 방향만 말한다. 얼마나 움직이는지는 계산할 수 없다.",
+ weapon:"ΔG° = −RT ln K · van't Hoff 식",
+ next:"온도가 평형을 옮긴다면, 얼마나 옮기는지 계산할 수 있을까? K의 온도 변화에서 ΔH를 뽑아낼 수 있을까?",
+ V:[["온도","van't Hoff plot의 핵심 변수"],["농도","공통 이온 효과"],["이온 세기","활동도 보정"],["용매 조성","물 / 아세톤 비율"]],
+ M:[["분광 + 온도 센서","온도별 흡광도 → K(T)"],["적정","평형 농도 직접 정량"],["수치 최적화","조건 탐색 시뮬레이션"]],
+ C:["총 농도","이온 세기","측정 파장","큐벳 온도(수조와 다를 수 있음)","평형 도달 대기 시간"],
+ G:[["1/T (K⁻¹)","ln K","기울기 = −ΔH/R. 르샤틀리에가 못 하는 일을 한다."],["온도 (°C)","흡광도 A","평형이 움직이는 걸 눈으로 본다."]],
+ R:["온도를 바꾼 뒤 평형 도달에 시간이 걸린다. → 충분히 기다렸는지 예비실험에서 확인하라.","큐벳 안 온도와 수조 온도가 다르다. → 큐벳에 직접 센서를 넣어 검증하라."]},
+
+{n:8,name:"속도식과 메커니즘",color:"#3A2E6B",unit:"VI 반응 속도",gear:"분광광도계 · 센서",obs:"반응 차수와 속도 상수 k",
+ hook:"무색 용액이 서서히가 아니라 갑자기 남색이 된다.",
+ wall:"화1·2 최악의 오개념 — \"계수 = 차수\". 반응 차수는 실험으로만 알 수 있다.",
+ weapon:"초기 속도법 · 속도 결정 단계 · 정상 상태 근사 · 반감기",
+ next:"차수가 계수와 다르다면, 실험 속도식만으로 메커니즘을 하나로 좁힐 수 있을까? 아니라면 무엇이 더 필요할까?",
+ V:[["각 반응물 농도","초기 속도법으로 차수 결정"],["온도","아레니우스 → 활성화 에너지"],["이온 세기","염 효과"],["촉매 유무","경로가 바뀌는가"]],
+ M:[["분광광도계 실시간","흡광도 vs 시간"],["CO₂ · 압력 센서","기체 발생 속도"],["육안 시간 측정","시계 반응의 전환 시각"],["ODE 수치적분","메커니즘별 곡선 생성 후 fitting"]],
+ C:["온도(항온조)","총 부피","이온 세기","혼합 방식·교반","측정 파장"],
+ G:[["log [초기 농도]","log (초기 속도)","기울기가 곧 반응 차수다."],["1/T (K⁻¹)","ln k","기울기 = −Ea/R."]],
+ R:["반응이 너무 빨라 초기 구간을 통째로 놓친다. → 예비실험에서 농도를 낮춰 속도를 조절하라.","혼합 시각과 측정 시작 시각이 어긋난다. → 두 사람이 동시에 시작하는 절차를 미리 짜라."]},
+
+{n:9,name:"촉매",color:"#6B4423",unit:"VI 반응 속도",gear:"압력 · 온도 센서",obs:"활성화 에너지 Ea",
+ hook:"교과서는 \"촉매는 평형을 못 바꾼다\"고 한다. 그런데 하버법은 촉매 없이는 공정 자체가 성립하지 않는다.",
+ wall:"화1·2는 \"Ea를 낮춘다\"로 끝난다. 촉매가 경로 자체를 바꾼다는 개념이 없다.",
+ weapon:"반응 메커니즘 변경 · 균일/불균일 촉매 · 아레니우스 · 충돌 모형",
+ next:"촉매가 경로를 바꾼다면 Ea가 얼마나 낮아질까? 효소는 왜 무기 촉매와 다른 곡선을 그릴까?",
+ V:[["촉매 종류","MnO₂ / KI / 카탈레이스(감자)"],["촉매 농도·양","속도와 촉매량의 관계"],["온도","촉매 유무에 따른 Ea 차이"],["기질 농도","포화가 일어나는가"]],
+ M:[["기체 발생 속도","O₂ 부피·압력 추적"],["온도 상승 속도","발열 추적"],["아레니우스 플롯","ln k vs 1/T"]],
+ C:["기질(H₂O₂) 농도","온도","촉매 입자 크기·표면적","용액 부피","용기 밀폐 상태"],
+ G:[["1/T (K⁻¹)","ln k","촉매별 Ea를 나란히 비교한다."],["기질 농도 (M)","초기 속도","효소는 휘고 무기 촉매는 직선이다. 이 차이가 핵심."]],
+ R:["불균일 촉매는 표면적이 제각각이라 재현성이 최악이다. → 입자 크기를 통일하거나 질량 대신 표면적을 기준 삼아라.","기체가 새면 발생량이 작게 나온다. → 밀폐 검사를 먼저 하라."],
+ safe:"고농도 과산화수소는 <b>피부·눈에 화상</b>을 입힙니다. 3~6% 이하로 희석해 쓰고 보안경을 착용하세요."},
+
+{n:10,name:"전지 전위",color:"#B87333",unit:"V 전기 화학",gear:"PASCO 전압계",obs:"전극 전위 E",
+ hook:"표에는 Cu²⁺/Cu = +0.34 V라고 적혀 있다. 암모니아를 넣으면 그 값이 바뀐다.",
+ wall:"화1·2는 E°를 표에서 찾는 상수로 취급한다. 왜 움직이는지 다루지 않는다.",
+ weapon:"Nernst 식 · 농도 의존성 · 착물 형성과 침전이 전위를 이동시킨다",
+ next:"착물이 전위를 옮긴다면, 그 이동량에서 Kf를 거꾸로 계산할 수 있을까? 분광법으로 구한 값과 맞을까?",
+ V:[["농도","농도차 전지"],["리간드 첨가","착물 형성에 따른 전위 이동"],["침전제 첨가","Ksp와 전위의 관계"],["pH","수소가 관여하는 반응"],["온도","Nernst의 온도항"]],
+ M:[["PASCO 전압계","전위 직접 측정"],["농도차 전지","Nernst 식 검증"],["분광법 교차검증","같은 Kf를 두 방법으로 구해 비교"]],
+ C:["온도","이온 세기","전극 표면 상태(연마)","기준 전극","염다리 조성"],
+ G:[["log [Cu²⁺]","E (V)","기울기가 0.0592/n 이면 Nernst 식이 살아 있다."],["첨가한 리간드 몰수","E (V)","전위 이동량에서 Kf를 역산한다."]],
+ R:["전극이 오염되면 전위가 계속 표류한다. → 매 측정 전 연마·세척 절차를 고정하라.","염다리와 액간 전위가 수십 mV의 계통 오차를 만든다. → 오차를 인정하고 크기를 추정하라."]},
+
+{n:11,name:"총괄성",color:"#B33A3A",unit:"II 상태와 용액",gear:"원심분리기 · 분광광도계",obs:"van't Hoff 인자 i와 용혈률",
+ hook:"증류수를 정맥에 주사하면 사람이 죽는다. 그런데 삼투압이 같은 우레아 용액도 적혈구를 터뜨린다.",
+ wall:"화1·2의 \"총괄성 = 입자 수에만 의존\"이 우레아 앞에서 무너진다.",
+ weapon:"van't Hoff 인자 i · 삼투압 · 이온쌍·활동도 계수 · 막 투과성",
+ next:"우레아가 예측을 벗어난다면, 총괄성만으로는 뭐가 빠진 걸까? 막을 통과하는 용질은 왜 다르게 행동할까?",
+ V:[["용질 종류","NaCl / 글루코스 / 우레아 — 우레아가 핵심"],["농도","용혈 곡선"],["용질 전하","1:1 vs 2:1 전해질"],["온도","확산 속도"]],
+ M:[["원심분리 + 흡광","상등액 헤모글로빈 540 nm 정량"],["전도도","실제 이온 수 추정"],["어는점 내림","i 값 독립 측정"]],
+ C:["혈구 현탁액 농도","노출 시간","온도","원심 조건(rpm·시간)","완충액 pH"],
+ G:[["용질 농도 (M)","용혈률 (%)","50% 용혈 지점이 등장 농도의 기준이 된다."],["이론 삼투압","실측 용혈률","우레아만 예측선을 벗어난다. 그 이탈이 발견이다."]],
+ R:["원심 조건이 달라지면 용혈률이 통째로 바뀐다. → rpm과 시간을 못 박고 절대 바꾸지 마라.","용혈 곡선이 가파르면 농도 몇 개로는 곡선이 안 그려진다. → 예비실험에서 농도 간격을 잡아라."],
+ safe:"<b>사람 혈액은 절대 사용 금지.</b> 도축장·시약사에서 구한 소·돼지 적혈구 현탁액을 쓰고, 생물학적 폐기물 처리 절차를 따르세요. 장갑·보안경 필수."},
+
+{n:12,name:"고체 구조",color:"#55606E",unit:"II 상태와 용액",gear:"정밀저울",obs:"격자 에너지와 밀도",
+ hook:"같은 화학식의 약인데 결정 구조만 달라져서 약효가 사라진 사건이 실제로 있었다.",
+ wall:"화1·2는 이온 결합을 정성적으로만 다룬다. 격자 에너지를 계산할 수 없다.",
+ weapon:"단위 세포 · 배위수 · Born–Haber 회로 · 다형체(polymorphism)",
+ next:"결정 구조가 약효를 바꾼다면, 구조와 격자 에너지는 어떻게 연결될까? 밀도만 재고도 원자 배열을 알아낼 수 있을까?",
+ V:[["결정 구조","FCC / BCC / 단순입방"],["이온 반지름·전하","격자 에너지 서열"],["결정화 조건","용매·냉각 속도 → 다형체"],["온도","용해도와 결정형"]],
+ M:[["밀도 측정","단위 세포 가정 → 아보가드로수 역산"],["용해 속도 비교","결정형별 용출 곡선"],["Born–Haber 계산","간접 경로로 격자 에너지"]],
+ C:["온도","시료의 건조·순도","반복 측정 횟수","용매 부피","교반 속도"],
+ G:[["이온 반지름 합 (pm)","격자 에너지 (kJ/mol)","Born–Landé 예측선과 실측을 겹친다."],["시간 (min)","용해된 양","결정형이 다르면 곡선이 갈라진다."]],
+ R:["시료에 기포나 공극이 있으면 밀도가 작게 나와 아보가드로수가 통째로 틀린다. → 반복 측정과 이상치 처리 기준을 정하라.","결정형을 확인할 장비가 없다. → 용해 속도와 결정 형태 관찰로 간접 판정하는 논리를 미리 세워라."]}
+];
+
+const CHECKS=[
+ {t:"모델 붕괴",d:"화학1·2의 개념만으로 답하려 하면 반드시 막히는가?"},
+ {t:"측정 가능",d:"8일 안에 숫자가 나오는가? 그래프를 그릴 수 있는가?"},
+ {t:"답이 안 떨어짐",d:"결과를 이미 알고 있다면 탈락. 해봐야 아는 질문인가?"},
+ {t:"분화",d:"같은 주제를 고른 다른 팀과 3축 중 하나 이상이 다른가?"},
+ {t:"실패 내성",d:"합성이나 측정이 망해도 남는 데이터가 있는가?"}
+];
+
+const S={topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:""};
+const $=id=>document.getElementById(id);
+const esc=s=>(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const code=()=>S.topic?`T${String(S.topic.n).padStart(2,"0")}·V${S.v!==null?S.v+1:"—"}·M${S.m!==null?S.m+1:"—"}·P${S.p!==null?PURPOSE[S.p].id:"—"}`:"— · — · — · —";
+
+function grid(){
+ $("grid").innerHTML=T.map((t,i)=>`<button class="tcard ${S.topic&&S.topic.n===t.n?"on":""}" data-t="${i}" style="--tc:${t.color}">
+  <div class="band"></div><div class="tbody">
+   <div class="tnum">주제 ${String(t.n).padStart(2,"0")}</div><div class="tname">${t.name}</div>
+   <div class="qline"><em>무엇이 관찰되는가?</em><span>${t.hook}</span></div>
+   <div class="qline"><em>왜 설명할 수 없을까?</em><span>${t.wall}</span></div>
+   <div class="qline"><em>어떤 개념이 필요한가?</em><span><b>${t.weapon}</b></span></div>
+   <div class="tmeta"><span class="tag unit">${t.unit}</span><span class="tag">${t.gear}</span></div>
+  </div></button>`).join("");
+ document.querySelectorAll(".tcard").forEach(b=>b.onclick=()=>{
+   const t=T[+b.dataset.t];
+   if(S.topic&&S.topic.n!==t.n){S.v=S.m=S.p=null;S.ctrls=[];S.plot=null;S.pilot="";$("pilot").value="";}
+   S.topic=t;document.documentElement.style.setProperty("--topic",t.color);
+   grid();axes();hard();sync();go(2);
+ });
+}
+
+function axes(){
+ const t=S.topic;if(!t)return;
+ $("axV").innerHTML=t.V.map((o,i)=>`<button class="chip ${S.v===i?"on":""}" data-a="v" data-i="${i}"><span class="ck">V${i+1}</span><span><b>${o[0]}</b><small>${o[1]}</small></span></button>`).join("");
+ $("axM").innerHTML=t.M.map((o,i)=>`<button class="chip ${S.m===i?"on":""}" data-a="m" data-i="${i}"><span class="ck">M${i+1}</span><span><b>${o[0]}</b><small>${o[1]}</small></span></button>`).join("");
+ $("axP").innerHTML=PURPOSE.map((o,i)=>`<button class="chip ${S.p===i?"on":""}" data-a="p" data-i="${i}"><span class="ck">P${o.id}</span><span><b>${o.t}</b><small>${o.d}</small></span></button>`).join("");
+ document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{S[b.dataset.a]=+b.dataset.i;axes();sync();});
+}
+
+function tmpl(){
+ const t=S.topic;if(!t)return;
+ const v=S.v!==null?t.V[S.v][0]:"[변수]", m=S.m!==null?t.M[S.m][0]:"[방법]", p=S.p!==null?PURPOSE[S.p].v:"[목적]";
+ const c=x=>x.startsWith("[")?"slot blank":"slot";
+ $("tmpl").innerHTML=`<span class="${c(v)}">${v}</span>을(를) 바꿀 때 <span class="slot">${t.obs}</span>은 어떻게 변하며, 이를 <span class="${c(m)}">${m}</span>(으)로 측정하여 <span class="${c(p)}">${p}</span>할 수 있는가?`;
+ $("asmCode").textContent=code();
+ $("sideWall").innerHTML=`<p><b>무엇이 관찰되는가?</b>${t.hook}</p><p><b>왜 설명할 수 없을까?</b>${t.wall}</p><p><b>어떤 개념이 필요한가?</b>${t.weapon}</p><p><b>다음엔 뭘 알아봐야 할까?</b>${t.next}</p><p><b>관측량</b>${t.obs}</p>`;
+}
+
+function checks(){
+ $("checks").innerHTML=CHECKS.map((c,i)=>`<div class="ci ${S.checks[i]?"on":""}" data-c="${i}"><div class="box">✓</div><div class="ci-t"><b>${i+1}. ${c.t}</b><small>${c.d}</small></div></div>`).join("");
+ document.querySelectorAll(".ci").forEach(e=>e.onclick=()=>{const i=+e.dataset.c;S.checks[i]=S.checks[i]?0:1;checks();sync();});
+ const n=S.checks.filter(Boolean).length;
+ $("ccnt").textContent=`${n} / 5`;$("ccnt").className="cnt"+(n===5?" pass":"");
+}
+
+function hard(){
+ const t=S.topic;if(!t)return;
+ $("safeBox").innerHTML=t.safe?`<div class="safety"><b>⚠ 이 주제의 주의사항</b><br>${t.safe}</div>`:"";
+ $("ctrls").innerHTML=t.C.map((c,i)=>`<button class="pill ${S.ctrls.includes(i)?"on":""}" data-c="${i}">${c}</button>`).join("");
+ document.querySelectorAll(".pill").forEach(b=>b.onclick=()=>{
+   const i=+b.dataset.c;
+   S.ctrls=S.ctrls.includes(i)?S.ctrls.filter(x=>x!==i):[...S.ctrls,i];
+   hard();sync();
+ });
+ $("plots").innerHTML=t.G.map((g,i)=>`<button class="plot ${S.plot===i?"on":""}" data-g="${i}"><div class="axis-line">x: ${g[0]} &nbsp;/&nbsp; y: ${g[1]}</div><b>${g[1]} vs ${g[0]}</b><small>${g[2]}</small></button>`).join("");
+ document.querySelectorAll(".plot").forEach(b=>b.onclick=()=>{S.plot=+b.dataset.g;hard();sync();});
+ $("risks").innerHTML=t.R.map((r,i)=>`<div class="risk"><i>0${i+1}</i><span>${r}</span></div>`).join("");
+}
+
+function card(){
+ const t=S.topic;if(!t||S.v===null||S.m===null||S.p===null||S.plot===null)return;
+ const P=PURPOSE[S.p], g=t.G[S.plot];
+ $("outCode").textContent=code();
+ $("outTitle").textContent=(S.team||"이름 없는 팀")+" — 탐구 설계 카드";
+ $("outBody").innerHTML=`
+  <div class="row"><span class="rk">주제</span><span class="rv"><b>${String(t.n).padStart(2,"0")} ${t.name}</b> <em>· ${t.unit}</em></span></div>
+  <div class="row"><span class="rk">왜 막히나</span><span class="rv"><em>${t.wall}</em></span></div>
+  <div class="row"><span class="rk">변수축 V${S.v+1}</span><span class="rv"><b>${t.V[S.v][0]}</b> <em>— ${t.V[S.v][1]}</em></span></div>
+  <div class="row"><span class="rk">방법축 M${S.m+1}</span><span class="rv"><b>${t.M[S.m][0]}</b> <em>— ${t.M[S.m][1]}</em></span></div>
+  <div class="row"><span class="rk">목적축 P${P.id}</span><span class="rv"><b>${P.t}</b> <em>— ${P.d}</em></span></div>
+  <div class="row"><span class="rk">메타 질문</span><span class="rv"><b>${esc(S.mq)}</b></span></div>
+  <div class="row"><span class="rk">모르는 이유</span><span class="rv"><em>${esc(S.unknown)}</em></span></div>
+  <div class="row"><span class="rk">고정할 것</span><span class="rv"><em>${S.ctrls.map(i=>t.C[i]).join(" · ")}</em></span></div>
+  <div class="row"><span class="rk">그릴 그래프</span><span class="rv"><b>y: ${g[1]} vs x: ${g[0]}</b> <em>— ${g[2]}</em></span></div>
+  <div class="row"><span class="rk">예비실험</span><span class="rv"><em>${esc(S.pilot)}</em></span></div>
+  <div class="row"><span class="rk">주요 장비</span><span class="rv"><em>${t.gear}</em></span></div>`;
+}
+
+function sync(){
+ $("codeVal").textContent=code();
+ $("codeChip").className="code-chip"+(S.topic?"":" empty");
+ const ax=S.v!==null&&S.m!==null&&S.p!==null;
+ const ck=S.checks.every(Boolean);
+ const mqOK=S.mq.trim().length>10&&S.unknown.trim().length>4&&ck;
+ const hdOK=S.ctrls.length>=2&&S.plot!==null&&S.pilot.trim().length>4;
+
+ $("d1").textContent=S.topic?"✓":"";$("d2").textContent=ax?"✓":"";
+ $("d3").textContent=mqOK?"✓":"";$("d4").textContent=hdOK?"✓":"";
+
+ $("toStep3").disabled=!ax;
+ $("ax-warn").textContent=ax?"":"세 축을 모두 고르세요.";
+ $("toStep4").disabled=!mqOK;
+ $("mq-warn").textContent=mqOK?"":(S.mq.trim().length<=10?"메타 질문을 쓰세요.":(!ck?"5개 조건을 모두 통과해야 합니다.":"3번 조건의 근거를 쓰세요."));
+ $("toStep5").disabled=!hdOK;
+ $("p-warn").textContent=hdOK?"":(S.ctrls.length<2?"고정할 변인을 최소 2개 고르세요.":(S.plot===null?"그릴 그래프를 고르세요.":"예비실험에서 확인할 것을 쓰세요."));
+
+ document.querySelectorAll("#rail button").forEach(b=>{
+   const s=+b.dataset.s;
+   b.disabled=(s===2&&!S.topic)||(s===3&&!ax)||(s===4&&!mqOK)||(s===5&&!hdOK);
+ });
+ tmpl();card();
+}
+
+function go(n){
+ document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",+p.dataset.p===n));
+ document.querySelectorAll("#rail button").forEach(b=>b.classList.toggle("on",+b.dataset.s===n));
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function text(){
+ const t=S.topic,P=PURPOSE[S.p],g=t.G[S.plot];
+ return `고급화학 팀 탐구 설계 카드
+설계 코드: ${code()}
+팀: ${S.team||"(미기입)"}
+
+[주제] ${String(t.n).padStart(2,"0")} ${t.name}  (${t.unit})
+[무엇이 관찰되는가?] ${t.hook}
+[왜 설명할 수 없을까?] ${t.wall}
+[어떤 개념이 필요한가?] ${t.weapon}
+[다음엔 뭘 알아봐야 할까?] ${t.next}
+
+[변수축 V${S.v+1}] ${t.V[S.v][0]} — ${t.V[S.v][1]}
+[방법축 M${S.m+1}] ${t.M[S.m][0]} — ${t.M[S.m][1]}
+[목적축 P${P.id}] ${P.t} — ${P.d}
+
+[메타 질문]
+${S.mq.trim()}
+
+[아직 결과를 모르는 이유]
+${S.unknown.trim()}
+
+[고정할 변인]
+${S.ctrls.map(i=>"· "+t.C[i]).join("\n")}
+
+[그릴 그래프]
+x축: ${g[0]}
+y축: ${g[1]}
+의미: ${g[2]}
+
+[예비실험(Day 3)에서 확인할 것]
+${S.pilot.trim()}
+
+[주요 장비] ${t.gear}
+[통과 조건] 5/5 충족`;
+}
+
+document.querySelectorAll("#rail button").forEach(b=>b.onclick=()=>{if(!b.disabled)go(+b.dataset.s)});
+$("toStep3").onclick=()=>go(3);
+$("toStep4").onclick=()=>go(4);
+$("toStep5").onclick=()=>go(5);
+$("mq").oninput=e=>{S.mq=e.target.value;sync()};
+$("unknown").oninput=e=>{S.unknown=e.target.value;sync()};
+$("pilot").oninput=e=>{S.pilot=e.target.value;sync()};
+$("team").oninput=e=>{S.team=e.target.value;card()};
+$("copyBtn").onclick=async()=>{
+ try{await navigator.clipboard.writeText(text());$("okmsg").textContent="복사했습니다.";}
+ catch{$("okmsg").textContent="복사에 실패했습니다. 카드를 직접 선택해 복사하세요.";}
+ setTimeout(()=>$("okmsg").textContent="",2600);
+};
+$("dlBtn").onclick=()=>{
+ const b=new Blob([text()],{type:"text/plain;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(b);
+ a.download=`설계카드_${code().replace(/·/g,"-").replace(/\s|—/g,"")}.txt`;a.click();URL.revokeObjectURL(a.href);
+};
+$("resetBtn").onclick=()=>{
+ Object.assign(S,{topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:""});
+ $("mq").value="";$("unknown").value="";$("pilot").value="";$("team").value="";
+ document.documentElement.style.setProperty("--topic","#3B4FC4");
+ grid();checks();sync();go(1);
+};
+
+grid();checks();sync();
+</script>
+<script>
+/* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */
+(function(){
+  if(window.self===window.top) return;
+  document.documentElement.classList.add('embedded');
+  var s=document.createElement('style');
+  s.textContent=".gtb{display:none!important}"+
+    "header{top:0!important}"+
+    ".side{top:80px!important}"+
+    "nav .nlinks a.cross{display:none!important}";
+  document.head.appendChild(s);
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.t==='goFrag'&&e.data.frag){
+      var el=document.getElementById(e.data.frag);
+      if(el) el.scrollIntoView({behavior:'smooth'});
+      else location.hash=e.data.frag;
+    }
+  });
+})();
+</script>
+</body>
+</html>
