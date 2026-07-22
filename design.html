@@ -159,6 +159,43 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 .risk:last-of-type{border-bottom:none}
 .risk i{font-style:normal;color:var(--risk);font-weight:700;flex:none;font-family:var(--mono);font-size:12.5px;padding-top:1px}
 .safety{background:#fef6f5;padding:14px 18px;margin-bottom:20px;font-size:13px;color:#a03530;line-height:1.6;border-radius:var(--r-sm)}
+
+/* save panel */
+.savebtn{font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;padding:8px 15px;
+  border:none;background:var(--paper-2);color:var(--ink-2);border-radius:980px;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:7px;transition:.16s}
+.savebtn:hover{box-shadow:var(--shadow-lg)}
+.savebtn #saveStatus{color:var(--ok);font-size:9px}
+.savebtn.pending #saveStatus{color:var(--ink-3)}
+.savepanel{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;background:var(--paper-2);
+  border-radius:var(--r);margin:0;box-shadow:var(--shadow)}
+.savepanel.open{max-height:420px;padding:20px 22px;margin-bottom:18px}
+.sp-note{font-size:13px;color:var(--ink-2);margin-bottom:14px;line-height:1.6}
+.sp-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.sp-col .flab{margin-bottom:8px}
+.mono-area{width:100%;font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--ink);
+  border:2px solid var(--rule);border-radius:var(--r-sm);background:#fafafb;padding:12px;resize:vertical;min-height:90px}
+.mono-area:focus{outline:none;border-color:var(--tint)}
+@media(max-width:720px){.sp-cols{grid-template-columns:1fr}}
+
+/* precision design (step 5) */
+.timegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.timegrid label{margin-bottom:6px}
+.timeresult{margin-top:16px;padding:16px 18px;border-radius:var(--r-sm);background:#f5f5f7;font-size:14px;line-height:1.7}
+.timeresult b{font-weight:600}
+.timeresult .tr-warn{color:var(--warn);font-weight:600}
+.timeresult .tr-ok{color:var(--ok);font-weight:600}
+.timeresult .tr-big{font-family:var(--mono);font-size:20px;font-weight:700;letter-spacing:-0.02em}
+.errgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.errgrid label{margin-bottom:6px}
+.qhint{font-size:12.5px;color:var(--ink-3);line-height:1.5}
+.proc-row{display:grid;grid-template-columns:32px 1fr 90px 32px;gap:10px;align-items:center;margin-bottom:9px}
+.proc-row .pn{font-family:var(--mono);font-size:13px;color:var(--ink-3);text-align:center}
+.proc-row input[type=text]{margin:0}
+.proc-row input[type=number]{margin:0;text-align:center}
+.proc-del{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:18px;line-height:1;padding:0}
+.proc-del:hover{color:var(--warn)}
+@media(max-width:640px){.timegrid{grid-template-columns:1fr 1fr}}
 .safety b{font-weight:700}
 
 .out{background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow-lg);overflow:hidden}
@@ -225,7 +262,33 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
   <div class="wrap">
     <div class="hbar">
       <div class="brand"><h1>고급화학 팀 탐구 설계실</h1><span>Team Inquiry Design</span></div>
-      <div class="code-chip empty" id="codeChip"><small>설계 코드</small><span id="codeVal">— · — · — · —</span></div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <button class="savebtn" id="saveToggle"><span id="saveStatus">●</span> 저장</button>
+        <div class="code-chip empty" id="codeChip"><small>설계 코드</small><span id="codeVal">— · — · — · —</span></div>
+      </div>
+    </div>
+    <div class="savepanel" id="savePanel">
+      <div class="sp-row">
+        <p class="sp-note" id="autoNote">이 브라우저에 자동으로 저장되고 있습니다. 같은 컴퓨터로 다시 오면 이어집니다.</p>
+      </div>
+      <div class="sp-cols">
+        <div class="sp-col">
+          <label class="flab">다른 기기로 옮기려면 <em>— 저장 코드를 만들어 복사하세요</em></label>
+          <textarea id="saveOut" class="mono-area" readonly placeholder="아래 버튼을 누르면 저장 코드가 여기 나타납니다"></textarea>
+          <div class="bar" style="margin-top:8px">
+            <button class="btn sm" id="makeCodeBtn">저장 코드 만들기</button>
+            <button class="btn ghost sm" id="copyCodeBtn">복사</button>
+          </div>
+        </div>
+        <div class="sp-col">
+          <label class="flab">저장 코드로 이어하려면 <em>— 붙여넣고 불러오기</em></label>
+          <textarea id="loadIn" class="mono-area" placeholder="복사해둔 저장 코드를 여기 붙여넣으세요"></textarea>
+          <div class="bar" style="margin-top:8px">
+            <button class="btn sm" id="loadCodeBtn">불러오기</button>
+            <span class="warnmsg" id="loadMsg"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="rail" id="rail">
@@ -233,7 +296,8 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
     <button data-s="2" disabled><span class="rnum">2</span><span class="rtxt">분화 3축 정하기</span><span class="rdone" id="d2"></span></button>
     <button data-s="3" disabled><span class="rnum">3</span><span class="rtxt">메타 질문 빚기</span><span class="rdone" id="d3"></span></button>
     <button data-s="4" disabled><span class="rnum">4</span><span class="rtxt">실험 다지기</span><span class="rdone" id="d4"></span></button>
-    <button data-s="5" disabled><span class="rnum">5</span><span class="rtxt">설계 카드</span></button>
+    <button data-s="5" disabled><span class="rnum">5</span><span class="rtxt">정밀 설계</span><span class="rdone" id="d5"></span></button>
+    <button data-s="6" disabled><span class="rnum">6</span><span class="rtxt">설계 카드</span></button>
   </div>
 </header>
 
@@ -308,11 +372,59 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
   </div>
   <label class="flab">예비실험(Day 3)에서 <u>반드시 확인할 것</u> <em>— 위 '깨질 지점'을 읽고 쓰세요</em></label>
   <input type="text" id="pilot" placeholder="예) 리간드를 몇 배 과량 넣어야 원래 수화 착물 피크가 사라지는지부터 확인한다">
-  <div class="bar"><button class="btn" id="toStep5" disabled>설계 카드 만들기 →</button><span class="warnmsg" id="p-warn"></span></div>
+  <div class="bar"><button class="btn" id="toStep5" disabled>정밀 설계로 가기 →</button><span class="warnmsg" id="p-warn"></span></div>
 </section>
 
 <section class="panel" data-p="5">
-  <div class="eyebrow">Step 5 — 제출</div>
+  <div class="eyebrow">Step 5 — 정밀 설계</div>
+  <h2>말로 된 계획을 숫자로 바꾼다</h2>
+  <p class="lede">팀 간 리뷰 없이 진행하는 만큼, <b>여기서 스스로 구멍을 찾아야 합니다.</b> 넷 중 하나라도 비면 계획은 아직 종이 위에만 있는 것입니다.</p>
+
+  <div class="sec">
+    <div class="sec-h"><b>① 사전 예측</b><span>실험하기 전에 결과를 먼저 선언 — 봉인하듯이</span></div>
+    <div class="sec-b">
+      <label class="flab">우리 예측 <em>— 숫자든 방향이든, 근거와 함께</em></label>
+      <textarea id="predict" placeholder="예) en의 Δ가 NH₃보다 클 것이다. 킬레이트 효과로 배위 결합이 더 강해질 것이라 예상되기 때문."></textarea>
+      <p class="qhint" style="margin-top:8px">실측 후 이 예측과 비교하세요. 맞아도, 틀려도 둘 다 발견입니다.</p>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>② 소요시간 계산</b><span>계획이 8일 안에 들어오는지 지금 확인</span></div>
+    <div class="sec-b">
+      <div class="timegrid">
+        <div><label class="flab">조건 수</label><input type="number" min="1" id="tConds" placeholder="예) 5"></div>
+        <div><label class="flab">반복 횟수</label><input type="number" min="1" id="tReps" placeholder="예) 3"></div>
+        <div><label class="flab">조건당 소요(분)</label><input type="number" min="1" id="tMin" placeholder="예) 12"></div>
+        <div><label class="flab">준비·정리(분)</label><input type="number" min="0" id="tSetup" placeholder="예) 40"></div>
+      </div>
+      <div class="timeresult" id="timeResult"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>③ 오차 전파 계산</b><span>이 오차로 조건들을 구별할 수 있는가</span></div>
+    <div class="sec-b">
+      <label class="flab">측정값 형태</label>
+      <div class="pills" id="errForm"></div>
+      <div class="errgrid" id="errInputs" style="margin-top:12px"></div>
+      <div class="timeresult" id="errResult"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>④ 실험 절차</b><span>무엇을 몇 분에, 순서대로</span></div>
+    <div class="sec-b">
+      <div id="procList"></div>
+      <button class="btn ghost sm" id="addStep" style="margin-top:10px">+ 단계 추가</button>
+    </div>
+  </div>
+
+  <div class="bar"><button class="btn" id="toStep6" disabled>설계 카드 만들기 →</button><span class="warnmsg" id="pd-warn"></span></div>
+</section>
+
+<section class="panel" data-p="6">
+  <div class="eyebrow">Step 6 — 제출</div>
   <h2>설계 카드</h2>
   <p class="lede">복사하거나 파일로 내려받아 제출하세요. 다른 팀과 <b>설계 코드가 같으면 중복</b>입니다 — 축 하나를 바꿔 다시 오세요.</p>
   <div class="out">
@@ -488,7 +600,8 @@ const CHECKS=[
  {t:"실패 내성",d:"합성이나 측정이 망해도 남는 데이터가 있는가?"}
 ];
 
-const S={topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:""};
+const S={topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:"",
+ predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]};
 const $=id=>document.getElementById(id);
 const esc=s=>(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const code=()=>S.topic?`T${String(S.topic.n).padStart(2,"0")}·V${S.v!==null?S.v+1:"—"}·M${S.m!==null?S.m+1:"—"}·P${S.p!==null?PURPOSE[S.p].id:"—"}`:"— · — · — · —";
@@ -504,9 +617,12 @@ function grid(){
   </div></button>`).join("");
  document.querySelectorAll(".tcard").forEach(b=>b.onclick=()=>{
    const t=T[+b.dataset.t];
-   if(S.topic&&S.topic.n!==t.n){S.v=S.m=S.p=null;S.ctrls=[];S.plot=null;S.pilot="";$("pilot").value="";}
+   if(S.topic&&S.topic.n!==t.n){
+     S.v=S.m=S.p=null;S.ctrls=[];S.plot=null;S.pilot="";$("pilot").value="";
+     S.errForm=null;S.errVals={};
+   }
    S.topic=t;document.documentElement.style.setProperty("--topic",t.color);
-   grid();axes();hard();sync();go(2);
+   grid();axes();hard();precisionDesign();sync();go(2);
  });
 }
 
@@ -538,7 +654,7 @@ function hard(){
  const t=S.topic;if(!t)return;
  $("safeBox").innerHTML=t.safe?`<div class="safety"><b>⚠ 이 주제의 주의사항</b><br>${t.safe}</div>`:"";
  $("ctrls").innerHTML=t.C.map((c,i)=>`<button class="pill ${S.ctrls.includes(i)?"on":""}" data-c="${i}">${c}</button>`).join("");
- document.querySelectorAll(".pill").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll("#ctrls .pill").forEach(b=>b.onclick=()=>{
    const i=+b.dataset.c;
    S.ctrls=S.ctrls.includes(i)?S.ctrls.filter(x=>x!==i):[...S.ctrls,i];
    hard();sync();
@@ -548,9 +664,90 @@ function hard(){
  $("risks").innerHTML=t.R.map((r,i)=>`<div class="risk"><i>0${i+1}</i><span>${r}</span></div>`).join("");
 }
 
+/* ===== Step 5: 정밀 설계 ===== */
+const ERR_FORMS=[
+ {t:"역수형",d:"예: Δ = hc/λ · NA (반비례 관계)"},
+ {t:"비율형",d:"예: ε = A/(c·l) (몫)"},
+ {t:"차이형",d:"예: ΔT, 두 신호의 차"}
+];
+
+function timeCalc(){
+ const c=+S.tConds||0,r=+S.tReps||0,m=+S.tMin||0,su=+S.tSetup||0;
+ const total=c*r*m+su;
+ const h=Math.floor(total/60),mm=Math.round(total%60);
+ const BUDGET=240; // 하루 실험 가용시간(분) 대략치, 4시간
+ let html=`<b>총 소요시간 예상 : </b><span class="tr-big">${c&&r&&m?`${h}시간 ${mm}분`:"—"}</span>`;
+ if(c&&r&&m){
+   html+=` <span class="${total>BUDGET?'tr-warn':'tr-ok'}">(하루 4시간 기준 ${total>BUDGET?`${Math.ceil(total/BUDGET)}일 필요 — 조건이나 반복을 줄이는 걸 고려하세요`:"하루 안에 들어옵니다"})</span>`;
+ }
+ $("timeResult").innerHTML=html;
+}
+
+function errCalc(){
+ const f=S.errForm;
+ if(f===null){$("errInputs").innerHTML="";$("errResult").innerHTML="";return;}
+ const v=S.errVals;
+ const num=(k,ph)=>`<div><label class="flab">${ph}</label><input type="number" step="any" data-ek="${k}" value="${v[k]??""}"></div>`;
+ if(f===0){
+   $("errInputs").innerHTML=num("x","측정값 x")+num("dx","측정 오차 δx (절대값)");
+ } else {
+   $("errInputs").innerHTML=num("v1",f===1?"분자 값":"측정값 1")+num("e1","그 오차")+num("v2",f===1?"분모 값":"측정값 2")+num("e2","그 오차");
+ }
+ document.querySelectorAll("[data-ek]").forEach(inp=>inp.oninput=e=>{S.errVals[e.target.dataset.ek]=e.target.value;errCalc();sync();});
+
+ let html="";
+ if(f===0){
+   const x=+v.x,dx=+v.dx;
+   if(x){
+     const rel=Math.abs(dx/x)*100;
+     html=`상대오차 ≈ <span class="tr-big">${rel.toFixed(1)}%</span> — 역수형이므로 결과값도 같은 상대오차를 갖습니다.<br>`+
+       (rel>15?`<span class="tr-warn">15%를 넘습니다. 이웃한 조건끼리 이보다 값 차이가 작다면 구별이 어렵습니다.</span>`
+              :`<span class="tr-ok">비교적 작습니다. 조건 간 차이가 이보다 크면 구별 가능성이 높습니다.</span>`);
+   }
+ } else {
+   const v1=+v.v1,e1=+v.e1,v2=+v.v2,e2=+v.e2;
+   if(v1&&v2){
+     if(f===1){
+       const rel=Math.sqrt((e1/v1)**2+(e2/v2)**2)*100;
+       html=`합성 상대오차 ≈ <span class="tr-big">${rel.toFixed(1)}%</span> (두 상대오차의 제곱합)<br>`+
+         (rel>15?`<span class="tr-warn">15%를 넘습니다. 분모·분자 중 오차가 큰 쪽을 먼저 줄이세요.</span>`
+                :`<span class="tr-ok">비교적 작습니다.</span>`);
+     } else {
+       const abs=Math.sqrt(e1**2+e2**2), diff=Math.abs(v1-v2), rel=diff?abs/diff*100:Infinity;
+       html=`합성 절대오차 ≈ <span class="tr-big">${abs.toFixed(3)}</span> · 두 값의 차이 = ${diff.toFixed(3)}<br>`+
+         (diff===0?`<span class="tr-warn">두 값이 같습니다 — 차이를 구별할 수 없습니다.</span>`
+                  :rel>30?`<span class="tr-warn">오차가 차이의 ${rel.toFixed(0)}%나 됩니다. 이 차이는 오차 안에 묻힐 수 있습니다.</span>`
+                  :`<span class="tr-ok">오차가 차이의 ${rel.toFixed(0)}% 수준입니다. 구별 가능성이 있습니다.</span>`);
+     }
+   }
+ }
+ $("errResult").innerHTML=html;
+}
+
+function procRender(){
+ $("procList").innerHTML=S.proc.map((p,i)=>`<div class="proc-row">
+   <span class="pn">${i+1}</span>
+   <input type="text" data-pd="${i}" value="${esc(p.desc)}" placeholder="예) 리간드 용액 조제">
+   <input type="number" data-pm="${i}" value="${p.min}" placeholder="분">
+   <button class="proc-del" data-pdel="${i}" title="삭제">×</button>
+ </div>`).join("");
+ document.querySelectorAll("[data-pd]").forEach(inp=>inp.oninput=e=>{S.proc[+e.target.dataset.pd].desc=e.target.value;sync();});
+ document.querySelectorAll("[data-pm]").forEach(inp=>inp.oninput=e=>{S.proc[+e.target.dataset.pm].min=e.target.value;sync();});
+ document.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{S.proc.splice(+b.dataset.pdel,1);if(!S.proc.length)S.proc.push({desc:"",min:""});procRender();sync();});
+}
+
+function precisionDesign(){
+ $("errForm").innerHTML=ERR_FORMS.map((f,i)=>`<button class="pill ${S.errForm===i?"on":""}" data-ef="${i}">${f.t}<small style="display:block;font-weight:400;opacity:.7">${f.d}</small></button>`).join("");
+ document.querySelectorAll("#errForm .pill").forEach(b=>b.onclick=()=>{S.errForm=+b.dataset.ef;S.errVals={};precisionDesign();sync();});
+ timeCalc();errCalc();procRender();
+}
+
+
 function card(){
  const t=S.topic;if(!t||S.v===null||S.m===null||S.p===null||S.plot===null)return;
  const P=PURPOSE[S.p], g=t.G[S.plot];
+ const totalMin=(+S.tConds||0)*(+S.tReps||0)*(+S.tMin||0)+(+S.tSetup||0);
+ const procTxt=S.proc.filter(p=>p.desc.trim()).map((p,i)=>`${i+1}. ${p.desc} (${p.min||"?"}분)`).join(" · ");
  $("outCode").textContent=code();
  $("outTitle").textContent=(S.team||"이름 없는 팀")+" — 탐구 설계 카드";
  $("outBody").innerHTML=`
@@ -564,6 +761,9 @@ function card(){
   <div class="row"><span class="rk">고정할 것</span><span class="rv"><em>${S.ctrls.map(i=>t.C[i]).join(" · ")}</em></span></div>
   <div class="row"><span class="rk">그릴 그래프</span><span class="rv"><b>y: ${g[1]} vs x: ${g[0]}</b> <em>— ${g[2]}</em></span></div>
   <div class="row"><span class="rk">예비실험</span><span class="rv"><em>${esc(S.pilot)}</em></span></div>
+  <div class="row"><span class="rk">사전 예측</span><span class="rv"><em>${esc(S.predict)}</em></span></div>
+  <div class="row"><span class="rk">소요시간</span><span class="rv"><em>조건 ${S.tConds} × 반복 ${S.tReps} × ${S.tMin}분 + 준비 ${S.tSetup||0}분 ≈ 총 ${totalMin}분</em></span></div>
+  <div class="row"><span class="rk">절차</span><span class="rv"><em>${procTxt||"—"}</em></span></div>
   <div class="row"><span class="rk">주요 장비</span><span class="rv"><em>${t.gear}</em></span></div>`;
 }
 
@@ -575,8 +775,13 @@ function sync(){
  const mqOK=S.mq.trim().length>10&&S.unknown.trim().length>4&&ck;
  const hdOK=S.ctrls.length>=2&&S.plot!==null&&S.pilot.trim().length>4;
 
+ const timeOK=(+S.tConds>0)&&(+S.tReps>0)&&(+S.tMin>0);
+ const errOK=S.errForm!==null&&(S.errForm===0?(S.errVals.x&&S.errVals.dx):(S.errVals.v1&&S.errVals.e1&&S.errVals.v2&&S.errVals.e2));
+ const procOK=S.proc.filter(p=>p.desc.trim()&&+p.min>0).length>=3;
+ const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&procOK;
+
  $("d1").textContent=S.topic?"✓":"";$("d2").textContent=ax?"✓":"";
- $("d3").textContent=mqOK?"✓":"";$("d4").textContent=hdOK?"✓":"";
+ $("d3").textContent=mqOK?"✓":"";$("d4").textContent=hdOK?"✓":"";$("d5").textContent=pdOK?"✓":"";
 
  $("toStep3").disabled=!ax;
  $("ax-warn").textContent=ax?"":"세 축을 모두 고르세요.";
@@ -584,12 +789,15 @@ function sync(){
  $("mq-warn").textContent=mqOK?"":(S.mq.trim().length<=10?"메타 질문을 쓰세요.":(!ck?"5개 조건을 모두 통과해야 합니다.":"3번 조건의 근거를 쓰세요."));
  $("toStep5").disabled=!hdOK;
  $("p-warn").textContent=hdOK?"":(S.ctrls.length<2?"고정할 변인을 최소 2개 고르세요.":(S.plot===null?"그릴 그래프를 고르세요.":"예비실험에서 확인할 것을 쓰세요."));
+ $("toStep6").disabled=!pdOK;
+ $("pd-warn").textContent=pdOK?"":(!S.predict.trim()?"사전 예측을 쓰세요.":(!timeOK?"소요시간 계산의 빈 칸을 채우세요.":(!errOK?"오차 전파 계산의 값을 입력하세요.":"절차를 최소 3단계 채우세요.")));
 
  document.querySelectorAll("#rail button").forEach(b=>{
    const s=+b.dataset.s;
-   b.disabled=(s===2&&!S.topic)||(s===3&&!ax)||(s===4&&!mqOK)||(s===5&&!hdOK);
+   b.disabled=(s===2&&!S.topic)||(s===3&&!ax)||(s===4&&!mqOK)||(s===5&&!hdOK)||(s===6&&!pdOK);
  });
  tmpl();card();
+ if(typeof autosave==="function"){ $("saveToggle")?.classList.add("pending"); autosave(); }
 }
 
 function go(n){
@@ -600,6 +808,8 @@ function go(n){
 
 function text(){
  const t=S.topic,P=PURPOSE[S.p],g=t.G[S.plot];
+ const totalMin=(+S.tConds||0)*(+S.tReps||0)*(+S.tMin||0)+(+S.tSetup||0);
+ const procTxt=S.proc.filter(p=>p.desc.trim()).map((p,i)=>`${i+1}. ${p.desc} — ${p.min||"?"}분`).join("\n");
  return `고급화학 팀 탐구 설계 카드
 설계 코드: ${code()}
 팀: ${S.team||"(미기입)"}
@@ -631,6 +841,20 @@ y축: ${g[1]}
 [예비실험(Day 3)에서 확인할 것]
 ${S.pilot.trim()}
 
+[사전 예측]
+${S.predict.trim()}
+
+[소요시간 계산]
+조건 ${S.tConds}개 × 반복 ${S.tReps}회 × 조건당 ${S.tMin}분 + 준비·정리 ${S.tSetup||0}분
+= 총 ${totalMin}분 (${Math.floor(totalMin/60)}시간 ${Math.round(totalMin%60)}분)
+
+[오차 전파 계산]
+형태: ${S.errForm!==null?ERR_FORMS[S.errForm].t:"-"}
+${document.getElementById("errResult")?document.getElementById("errResult").innerText:""}
+
+[실험 절차]
+${procTxt}
+
 [주요 장비] ${t.gear}
 [통과 조건] 5/5 충족`;
 }
@@ -639,9 +863,13 @@ document.querySelectorAll("#rail button").forEach(b=>b.onclick=()=>{if(!b.disabl
 $("toStep3").onclick=()=>go(3);
 $("toStep4").onclick=()=>go(4);
 $("toStep5").onclick=()=>go(5);
+$("toStep6").onclick=()=>go(6);
 $("mq").oninput=e=>{S.mq=e.target.value;sync()};
 $("unknown").oninput=e=>{S.unknown=e.target.value;sync()};
 $("pilot").oninput=e=>{S.pilot=e.target.value;sync()};
+$("predict").oninput=e=>{S.predict=e.target.value;sync()};
+["tConds","tReps","tMin","tSetup"].forEach(id=>$(id).addEventListener("input",e=>{S[id]=e.target.value;timeCalc();sync()}));
+$("addStep").onclick=()=>{S.proc.push({desc:"",min:""});procRender();sync()};
 $("team").oninput=e=>{S.team=e.target.value;card()};
 $("copyBtn").onclick=async()=>{
  try{await navigator.clipboard.writeText(text());$("okmsg").textContent="복사했습니다.";}
@@ -654,13 +882,106 @@ $("dlBtn").onclick=()=>{
  a.download=`설계카드_${code().replace(/·/g,"-").replace(/\s|—/g,"")}.txt`;a.click();URL.revokeObjectURL(a.href);
 };
 $("resetBtn").onclick=()=>{
- Object.assign(S,{topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:""});
- $("mq").value="";$("unknown").value="";$("pilot").value="";$("team").value="";
+ Object.assign(S,{topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:"",
+   predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]});
+ $("mq").value="";$("unknown").value="";$("pilot").value="";$("team").value="";$("predict").value="";
+ ["tConds","tReps","tMin","tSetup"].forEach(id=>$(id).value="");
  document.documentElement.style.setProperty("--topic","#3B4FC4");
- grid();checks();sync();go(1);
+ try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+ grid();checks();precisionDesign();sync();go(1);
 };
 
-grid();checks();sync();
+/* ===== 저장/불러오기 (로그인 없이) ===== */
+const SAVE_KEY="gochem_design_v1";
+
+function snapshot(){
+ return {topicN:S.topic?S.topic.n:null,v:S.v,m:S.m,p:S.p,mq:S.mq,unknown:S.unknown,checks:S.checks,
+  ctrls:S.ctrls,plot:S.plot,pilot:S.pilot,team:S.team,predict:S.predict,tConds:S.tConds,tReps:S.tReps,
+  tMin:S.tMin,tSetup:S.tSetup,errForm:S.errForm,errVals:S.errVals,proc:S.proc,savedAt:Date.now()};
+}
+
+function autosave(){
+ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); markSaved(); }
+ catch(e){ /* 저장 불가 환경 — 조용히 무시, 저장 코드로 대체 가능 */ }
+}
+
+function markSaved(){
+ const b=$("saveToggle"); if(!b) return;
+ b.classList.remove("pending");
+ const now=new Date();
+ b.title="마지막 자동 저장 "+now.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+}
+
+function applySnapshot(snap){
+ if(!snap) return false;
+ const topic = snap.topicN!=null ? T.find(t=>t.n===snap.topicN) : null;
+ Object.assign(S,{
+  topic, v:snap.v??null, m:snap.m??null, p:snap.p??null, mq:snap.mq||"", unknown:snap.unknown||"",
+  checks:snap.checks||[0,0,0,0,0], ctrls:snap.ctrls||[], plot:snap.plot??null, pilot:snap.pilot||"", team:snap.team||"",
+  predict:snap.predict||"", tConds:snap.tConds||"", tReps:snap.tReps||"", tMin:snap.tMin||"", tSetup:snap.tSetup||"",
+  errForm:snap.errForm??null, errVals:snap.errVals||{}, proc:snap.proc&&snap.proc.length?snap.proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]
+ });
+ if(topic) document.documentElement.style.setProperty("--topic",topic.color);
+
+ $("mq").value=S.mq; $("unknown").value=S.unknown; $("pilot").value=S.pilot; $("team").value=S.team;
+ $("predict").value=S.predict;
+ $("tConds").value=S.tConds; $("tReps").value=S.tReps; $("tMin").value=S.tMin; $("tSetup").value=S.tSetup;
+
+ grid();
+ if(topic){ axes(); hard(); }
+ checks(); precisionDesign(); sync();
+
+ const ax=S.v!==null&&S.m!==null&&S.p!==null;
+ const ck=S.checks.every(Boolean);
+ const mqOK=S.mq.trim().length>10&&S.unknown.trim().length>4&&ck;
+ const hdOK=S.ctrls.length>=2&&S.plot!==null&&S.pilot.trim().length>4;
+ const timeOK=(+S.tConds>0)&&(+S.tReps>0)&&(+S.tMin>0);
+ const errOK=S.errForm!==null&&(S.errForm===0?(S.errVals.x&&S.errVals.dx):(S.errVals.v1&&S.errVals.e1&&S.errVals.v2&&S.errVals.e2));
+ const procOK=S.proc.filter(pr=>pr.desc.trim()&&+pr.min>0).length>=3;
+ const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&procOK;
+ go(pdOK?6:hdOK?5:mqOK?4:ax?3:topic?2:1);
+ return true;
+}
+
+function tryAutoload(){
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(!raw) return false;
+  return applySnapshot(JSON.parse(raw));
+ }catch(e){ return false; }
+}
+
+function toB64(obj){ return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+function fromB64(str){ return JSON.parse(decodeURIComponent(escape(atob(str.trim())))); }
+
+$("saveToggle").onclick=()=>{
+ $("savePanel").classList.toggle("open");
+ const raw=localStorage.getItem(SAVE_KEY);
+ $("autoNote").textContent=raw
+  ?`이 브라우저에 자동 저장되고 있습니다 · 마지막 저장 ${new Date(JSON.parse(raw).savedAt).toLocaleString("ko-KR")}`
+  :"아직 저장된 내용이 없습니다. 입력을 시작하면 자동으로 저장됩니다.";
+};
+$("makeCodeBtn").onclick=()=>{ $("saveOut").value=toB64(snapshot()); };
+$("copyCodeBtn").onclick=async()=>{
+ if(!$("saveOut").value) $("saveOut").value=toB64(snapshot());
+ try{ await navigator.clipboard.writeText($("saveOut").value); }catch{}
+};
+$("loadCodeBtn").onclick=()=>{
+ const v=$("loadIn").value.trim();
+ if(!v){ $("loadMsg").textContent="붙여넣은 코드가 없습니다."; return; }
+ try{
+  applySnapshot(fromB64(v));
+  autosave();
+  $("loadMsg").innerHTML='<span style="color:var(--ok)">불러왔습니다.</span>';
+  $("savePanel").classList.remove("open");
+ }catch(e){
+  $("loadMsg").textContent="코드를 읽지 못했습니다. 복사한 코드 전체를 붙여넣었는지 확인하세요.";
+ }
+};
+
+grid();checks();precisionDesign();
+tryAutoload();
+sync();
 </script>
 <script>
 /* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */
