@@ -524,6 +524,173 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 })();
 </script>
 
+<!-- ============================================================
+     ③ 오차의 영향 확인 — 계산 형태 판단 + 이유 상시노출 + 보충 토글
+     기존 "예시로 이해하기 ▾"(온도계 예시) 아래에 이 블록을 추가하세요.
+     ============================================================ -->
+
+<div id="errWhyBox" class="err-why"></div>
+
+<div class="measure-cards" id="errForm"></div>
+
+<details class="err-more">
+  <summary>더 헷갈리면 예시로 확인하기 ▾</summary>
+
+  <div class="err-tree">
+    <b>판단 순서 — 내 계산식을 보고 물어보세요</b>
+    <ol>
+      <li>나누기(÷)가 있나요? 없다 → <b>뺄셈형</b> (예: ΔT = T₂ − T₁)</li>
+      <li>있다면, 나누는 분모가 <u>조작 변인 자체</u>인가요? 그렇다 → <b>나눗셈(반비례)형</b> (예: Δ = hc/λ·N_A, λ가 커지면 Δ가 작아짐)</li>
+      <li>아니라면, 서로 <u>다른 두 측정값</u>을 나눈 비율인가요? 그렇다 → <b>나눗셈(비율)형</b> (예: ε = A/(c·l))</li>
+    </ol>
+  </div>
+
+  <div class="err-worked">
+    <b>숫자로 확인하기</b><br>
+    λ = 500 nm, 오차 ±10 nm라면<br>
+    Δ = hc/λ → λ가 490~510 사이 어디든 될 수 있음<br>
+    → λ가 <b>커지면</b> Δ는 <b>작아진다</b> (반비례) → '나눗셈(반비례)형'
+  </div>
+
+  <div class="err-tree-vs">
+    <b>❌ 착각하기 쉬운 지점</b><br>
+    "Δ = hc/λ·N_A 도 나눗셈, ε = A/(c·l) 도 나눗셈이니 같은 거 아닌가?"<br>
+    <b>✅ 차이</b><br>
+    λ는 <u>조작 변인 자체</u>가 분모라서 그래프가 휘어짐(반비례) —<br>
+    c, l은 <u>서로 독립적인 두 측정값</u>의 몫이라 그래프가 직선(비율)
+  </div>
+
+  <div class="err-analogy">
+    <b>일상 비유</b>
+    <table>
+      <tr><td>나눗셈(반비례)</td><td>예산을 사람 수로 나누면, 사람이 늘수록 1인당 몫은 줄어드는 관계</td></tr>
+      <tr><td>나눗셈(비율)</td><td>농도 = 용질량 ÷ 용액량처럼, 서로 다른 두 값의 "몫"</td></tr>
+      <tr><td>뺄셈</td><td>두 온도계 눈금의 "차이"만 보는 것, 절댓값은 안 중요</td></tr>
+    </table>
+  </div>
+
+  <div class="err-try">
+    <b>🔍 숫자를 직접 넣어보기</b><br>
+    측정값 A <input type="number" id="tryA" value="10" step="0.1">
+    측정값 B <input type="number" id="tryB" value="20" step="0.1">
+    오차(±) <input type="number" id="tryErr" value="1" step="0.1">
+    <button id="tryBtn" type="button">계산</button>
+    <div id="tryResult"></div>
+  </div>
+
+  <div class="err-quiz">
+    <b>확인 퀴즈</b> — 형성 상수 Kf = [생성물] / [반응물] 은 어떤 형태일까요?
+    <div class="quiz-btns">
+      <button data-a="0" type="button">① 반비례형</button>
+      <button data-a="1" type="button">② 비율형</button>
+      <button data-a="2" type="button">③ 뺄셈형</button>
+    </div>
+    <div id="quizResult"></div>
+  </div>
+</details>
+
+<style>
+.err-why{
+  background:#eef6ff; border:1px solid #cfe4ff; border-radius:12px;
+  padding:12px 14px; margin:10px 0; font-size:13.5px; line-height:1.6; color:#1d1d1f;
+}
+.err-why b{color:#0071e3;}
+
+.err-more{
+  margin-top:14px; border:1px solid #e8e8ed; border-radius:12px; padding:4px 16px;
+  background:#fafafa;
+}
+.err-more summary{
+  cursor:pointer; font-weight:600; font-size:13.5px; color:#0071e3; padding:10px 0;
+  list-style:none;
+}
+.err-more summary::-webkit-details-marker{display:none;}
+.err-more[open] summary{margin-bottom:6px;}
+
+.err-tree, .err-worked, .err-tree-vs, .err-analogy, .err-try, .err-quiz{
+  font-size:13px; line-height:1.7; color:#3a3a3c; margin:12px 0; padding-bottom:12px;
+  border-bottom:1px dashed #e0e0e5;
+}
+.err-quiz{border-bottom:none;}
+.err-tree ol{margin:6px 0 0 18px; padding:0;}
+.err-tree li{margin-bottom:4px;}
+
+.err-tree-vs{background:#fff6f6; border-radius:10px; padding:10px 12px;}
+.err-analogy table{width:100%; border-collapse:collapse; margin-top:6px;}
+.err-analogy td{padding:6px 8px; border-bottom:1px solid #eee; vertical-align:top;}
+.err-analogy td:first-child{font-weight:600; color:#0071e3; white-space:nowrap; width:110px;}
+
+.err-try input{
+  width:70px; padding:6px 8px; border:1.5px solid #e0e0e5; border-radius:8px;
+  font-size:13px; margin:0 4px;
+}
+.err-try button, .quiz-btns button{
+  padding:6px 14px; border:none; border-radius:980px; background:#0071e3; color:#fff;
+  font-size:12.5px; font-weight:600; cursor:pointer; margin-left:6px;
+}
+.err-try button:hover, .quiz-btns button:hover{background:#0077ed;}
+#tryResult, #quizResult{margin-top:8px; font-weight:600;}
+.quiz-btns{margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;}
+</style>
+
+<script>
+/* ============================================================
+   오차 형태 판단 — 이유 상시노출 + 인터랙션
+   기존 precisionDesign() 함수 안에 errWhyBox 렌더링 부분을
+   추가하거나, precisionDesign()을 아래처럼 교체하세요.
+   ※ ERR_FORMS, S, $, sync, timeCalc, errCalc, procRender 는
+     design.html 기존 스크립트에 이미 정의되어 있다고 가정합니다.
+   ============================================================ */
+function precisionDesign(){
+  // 아직 안 골랐으면 주제 기본값으로 자동 선택
+  if(S.errForm==null && S.topic && S.topic.errDefault!=null){
+    S.errForm = S.topic.errDefault;
+  }
+
+  $("errForm").innerHTML = ERR_FORMS.map((f,i)=>
+    `<button class="mcard ${S.errForm===i?"on":""}" data-ef="${i}">
+       <b>${f.t}</b><small>${f.d}</small>
+     </button>`
+  ).join("");
+
+  document.querySelectorAll("#errForm .mcard").forEach(b=>{
+    b.onclick=()=>{ S.errForm=+b.dataset.ef; S.errVals={}; precisionDesign(); sync(); };
+  });
+
+  // 핵심 이유 — 항상 노출 (토글 밖)
+  const why = S.topic && S.topic.errWhy ? S.topic.errWhy : "";
+  $("errWhyBox").innerHTML = why
+    ? `💡 <b>${S.topic.name}</b> 주제는 보통 <b>${ERR_FORMS[S.errForm].t}</b>입니다 — ${why}
+       <br><span style="opacity:.65;font-size:12.5px">계산 방식이 다르다면 위 카드를 눌러 직접 바꾸세요.</span>`
+    : "";
+
+  timeCalc(); errCalc(); procRender();
+}
+
+/* ── 숫자 대입 인터랙션 (토글 안) ── */
+document.getElementById("tryBtn")?.addEventListener("click", ()=>{
+  const a=+document.getElementById("tryA").value;
+  const b=+document.getElementById("tryB").value;
+  const e=+document.getElementById("tryErr").value;
+  if(!a || !b){ document.getElementById("tryResult").textContent="A, B 값을 입력하세요."; return; }
+  const ratio = a/b;
+  const ratioLow = (a-e)/(b+e);
+  const ratioHigh = (a+e)/(b-e);
+  document.getElementById("tryResult").innerHTML =
+    `A/B = ${ratio.toFixed(3)} · 오차 반영 시 ${ratioLow.toFixed(3)} ~ ${ratioHigh.toFixed(3)} 사이에서 흔들림`;
+});
+
+/* ── 확인 퀴즈 (토글 안) ── */
+document.querySelectorAll(".quiz-btns button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const correct = +b.dataset.a===1; // 정답: 비율형
+    document.getElementById("quizResult").innerHTML = correct
+      ? "✅ 맞아요! 생성물과 반응물, 서로 다른 두 측정값의 비율이라 '비율형'입니다."
+      : "❌ 다시 생각해보세요 — 나누는 두 값이 서로 독립적인 측정값인가요, 아니면 조작 변인 자체가 분모인가요?";
+  });
+});
+</script>
+
     <div class="sec-b">
       <label class="flab">측정값 형태</label>
       <div class="pills" id="errForm"></div>
@@ -810,7 +977,7 @@ function timeCalc(){
  const BUDGET=240; // 하루 실험 가용시간(분) 대략치, 4시간
  let html=`<b>총 소요시간 예상 : </b><span class="tr-big">${c&&r&&m?`${h}시간 ${mm}분`:"—"}</span>`;
  if(c&&r&&m){
-   html+=` <span class="${total>BUDGET?'tr-warn':'tr-ok'}">(하루 4시간 기준 ${total>BUDGET?`${Math.ceil(total/BUDGET)}일 필요 — 조건이나 반복을 줄이는 걸 고려하세요`:"하루 안에 들어옵니다"})</span>`;
+   html+=` <span class="${total>BUDGET?'tr-warn':'tr-ok'}">(하루 4시간 기준 ${total>BUDGET?`${Math.ceil(total/BUDGET)}일 필요 — 조건이나 반복을 줄이는 걸 고려하세요`:"하루 안에 가능합니다"})</span>`;
  }
  $("timeResult").innerHTML=html;
 }
