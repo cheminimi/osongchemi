@@ -438,16 +438,22 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 </div>
 
 <style>
-  .eh-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
+.eh-row {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 
-  .eh-row .flab {
-    margin: 0;
-  }
+.eh-row .flab {
+  display: inline-block !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.eh-row .ios-toggle-row {
+  flex-shrink: 0;
+}
 
   .ios-toggle-row {
     display: inline-flex;
