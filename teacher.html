@@ -174,10 +174,10 @@ td em{font-style:normal;color:var(--ink-3);font-size:12.5px}
 <section id="teamView" style="display:none">
   <div class="eyebrow">Overview</div>
   <h2>전체 탐구 현황</h2>
-  <p class="lede">모든 팀의 <b>설계 코드 · 메타 질문 · 사용 장비</b>를 한눈에 봅니다. 실시간으로 갱신됩니다.</p>
+  <p class="lede">모든 팀의 <b>설계 코드 · 메타 질문 · 준비물 · 사용 장비</b>를 한눈에 봅니다. 실시간으로 갱신됩니다.</p>
   <table><thead><tr>
     <th style="width:38px"></th><th>팀</th><th style="width:118px">설계 코드</th>
-    <th>메타 질문</th><th style="width:140px">사용 장비</th>
+    <th>메타 질문</th><th style="width:170px">시약</th><th style="width:130px">기구</th><th style="width:120px">사용 장비</th>
   </tr></thead><tbody id="simpleRows"></tbody></table>
   <div class="empty" id="simpleEmpty" style="display:none;margin-top:14px">아직 등록된 팀 설계가 없습니다.</div>
 </section>
@@ -401,6 +401,8 @@ function docsToTeams(docs){
     t: d.topicN, v: d.v+1, m: d.m+1, p: "ABCD"[d.p],
     code: d.code || `T${String(d.topicN).padStart(2,"0")}·V${d.v+1}·M${d.m+1}·P${"ABCD"[d.p]}`,
     mq: d.mq || "(아직 메타 질문 없음)",
+    reagentsText: d.reagentsText || "",
+    toolsText: d.toolsText || "",
     gearReadable: (M&&M[1].length) ? M[1].map(g=>GEAR[g]).join(", ") : "—"
    };
   });
@@ -412,6 +414,8 @@ function renderSimple(){
    <td><b>${esc(x.name)}</b><br><em>${T[x.t].name}</em></td>
    <td class="code">${x.code}</td>
    <td>${esc(x.mq)}</td>
+   <td><em>${esc(x.reagentsText)||"—"}</em></td>
+   <td><em>${esc(x.toolsText)||"—"}</em></td>
    <td><em>${x.gearReadable}</em></td>
   </tr>`).join("");
  $("simpleEmpty").style.display = teams.length? "none":"block";

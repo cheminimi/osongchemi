@@ -194,6 +194,15 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 .proc-row .pn{font-family:var(--mono);font-size:13px;color:var(--ink-3);text-align:center}
 .proc-row input[type=text]{margin:0}
 .proc-row input[type=number]{margin:0;text-align:center}
+.reag-row{display:grid;grid-template-columns:1.3fr 0.8fr 0.9fr 32px;gap:10px;align-items:center;margin-bottom:9px}
+.tool-row{display:grid;grid-template-columns:1.3fr 0.8fr 32px;gap:10px;align-items:center;margin-bottom:9px}
+.reag-row input,.tool-row input{margin:0}
+.reag-head,.tool-head{display:grid;gap:10px;margin-bottom:8px;font-size:11px;color:var(--ink-3);font-weight:600}
+.reag-head{grid-template-columns:1.3fr 0.8fr 0.9fr 32px}
+.tool-head{grid-template-columns:1.3fr 0.8fr 32px}
+.row-del{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:18px;line-height:1;padding:0}
+.row-del:hover{color:var(--warn)}
+@media(max-width:640px){.reag-head,.tool-head{display:none}.reag-row,.tool-row{grid-template-columns:1fr 1fr 1fr 28px}}
 .proc-del{background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:18px;line-height:1;padding:0}
 .proc-del:hover{color:var(--warn)}
 @media(max-width:640px){.timegrid{grid-template-columns:1fr 1fr}}
@@ -411,6 +420,8 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
   <div class="sec-h"><b>③ 오차의 영향 확인</b><span>우리가 계획한 조건들이, 측정 오차 때문에 서로 구별이 안 되는 건 아닐까?</span></div>
 
   <div class="sec-b">
+
+    <!-- 예시로 이해하기 -->
     <div class="eh-row">
       <label class="flab">예시로 이해하기</label>
       <label class="ios-toggle-row" id="errorHelpBtn">
@@ -545,7 +556,26 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 </script>
 
   <div class="sec">
-    <div class="sec-h"><b>④ 실험 절차</b><span>구체적으로 실험 계획하기</span></div>
+    <div class="sec-h"><b>④ 준비물 (시약·기구)</b><span>무엇을 얼마나, 어떤 상태로 쓸지</span></div>
+    <div class="sec-b">
+      <label class="flab" style="margin-bottom:8px">시약</label>
+      <div class="reag-head">
+        <span>시약명</span><span>사용량</span><span>상태</span><span></span>
+      </div>
+      <div id="reagList"></div>
+      <button class="btn ghost sm" id="addReagent">+ 시약 추가</button>
+
+      <label class="flab" style="margin:18px 0 8px">기구</label>
+      <div class="tool-head">
+        <span>기구명</span><span>수량</span><span></span>
+      </div>
+      <div id="toolList"></div>
+      <button class="btn ghost sm" id="addTool">+ 기구 추가</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-h"><b>⑤ 실험 절차</b><span>구체적으로 실험 계획하기</span></div>
     <div class="sec-b">
       <div id="procList"></div>
       <button class="btn ghost sm" id="addStep" style="margin-top:10px">+ 단계 추가</button>
@@ -745,7 +775,8 @@ const CHECKS=[
 ];
 
 const S={topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:"",
- predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]};
+ predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}],
+ reagents:[{name:"",amount:"",state:""},{name:"",amount:"",state:""}], tools:[{name:"",qty:""},{name:"",qty:""}]};
 const $=id=>document.getElementById(id);
 const esc=s=>(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const code=()=>S.topic?`T${String(S.topic.n).padStart(2,"0")}·V${S.v!==null?S.v+1:"—"}·M${S.m!==null?S.m+1:"—"}·P${S.p!==null?PURPOSE[S.p].id:"—"}`:"— · — · — · —";
@@ -885,10 +916,34 @@ function procRender(){
  document.querySelectorAll("[data-pdel]").forEach(b=>b.onclick=()=>{S.proc.splice(+b.dataset.pdel,1);if(!S.proc.length)S.proc.push({desc:"",min:""});procRender();sync();});
 }
 
+function reagRender(){
+ $("reagList").innerHTML=S.reagents.map((r,i)=>`<div class="reag-row">
+   <input type="text" data-rn="${i}" value="${esc(r.name)}" placeholder="예) 황산구리(II) 5수화물">
+   <input type="text" data-ra="${i}" value="${esc(r.amount)}" placeholder="예) 0.5g">
+   <input type="text" data-rs="${i}" value="${esc(r.state)}" placeholder="예) 고체 · 수용액 · 농도">
+   <button class="row-del" data-rdel="${i}" title="삭제">×</button>
+ </div>`).join("");
+ document.querySelectorAll("[data-rn]").forEach(inp=>inp.oninput=e=>{S.reagents[+e.target.dataset.rn].name=e.target.value;sync();});
+ document.querySelectorAll("[data-ra]").forEach(inp=>inp.oninput=e=>{S.reagents[+e.target.dataset.ra].amount=e.target.value;sync();});
+ document.querySelectorAll("[data-rs]").forEach(inp=>inp.oninput=e=>{S.reagents[+e.target.dataset.rs].state=e.target.value;sync();});
+ document.querySelectorAll("[data-rdel]").forEach(b=>b.onclick=()=>{S.reagents.splice(+b.dataset.rdel,1);if(!S.reagents.length)S.reagents.push({name:"",amount:"",state:""});reagRender();sync();});
+}
+
+function toolRender(){
+ $("toolList").innerHTML=S.tools.map((t,i)=>`<div class="tool-row">
+   <input type="text" data-tn="${i}" value="${esc(t.name)}" placeholder="예) 분광광도계">
+   <input type="text" data-tq="${i}" value="${esc(t.qty)}" placeholder="예) 1대">
+   <button class="row-del" data-tdel="${i}" title="삭제">×</button>
+ </div>`).join("");
+ document.querySelectorAll("[data-tn]").forEach(inp=>inp.oninput=e=>{S.tools[+e.target.dataset.tn].name=e.target.value;sync();});
+ document.querySelectorAll("[data-tq]").forEach(inp=>inp.oninput=e=>{S.tools[+e.target.dataset.tq].qty=e.target.value;sync();});
+ document.querySelectorAll("[data-tdel]").forEach(b=>b.onclick=()=>{S.tools.splice(+b.dataset.tdel,1);if(!S.tools.length)S.tools.push({name:"",qty:""});toolRender();sync();});
+}
+
 function precisionDesign(){
  $("errForm").innerHTML=ERR_FORMS.map((f,i)=>`<button class="pill ${S.errForm===i?"on":""}" data-ef="${i}">${f.t}<small style="display:block;font-weight:400;opacity:.7">${f.d}</small></button>`).join("");
  document.querySelectorAll("#errForm .pill").forEach(b=>b.onclick=()=>{S.errForm=+b.dataset.ef;S.errVals={};precisionDesign();sync();});
- timeCalc();errCalc();procRender();
+ timeCalc();errCalc();procRender();reagRender();toolRender();
 }
 
 
@@ -897,6 +952,8 @@ function card(){
  const P=PURPOSE[S.p], g=t.G[S.plot];
  const totalMin=(+S.tConds||0)*(+S.tReps||0)*(+S.tMin||0)+(+S.tSetup||0);
  const procTxt=S.proc.filter(p=>p.desc.trim()).map((p,i)=>`${i+1}. ${p.desc} (${p.min||"?"}분)`).join(" · ");
+ const reagTxt=S.reagents.filter(r=>r.name.trim()).map(r=>`${r.name}${r.amount?` ${r.amount}`:""}${r.state?`(${r.state})`:""}`).join(", ");
+ const toolTxt=S.tools.filter(x=>x.name.trim()).map(x=>`${x.name}${x.qty?` ${x.qty}`:""}`).join(", ");
  $("outCode").textContent=code();
  $("outTitle").textContent=(S.team||"이름 없는 팀")+" — 탐구 설계 카드";
  $("outBody").innerHTML=`
@@ -912,6 +969,8 @@ function card(){
   <div class="row"><span class="rk">예비실험</span><span class="rv"><em>${esc(S.pilot)}</em></span></div>
   <div class="row"><span class="rk">사전 예측</span><span class="rv"><em>${esc(S.predict)}</em></span></div>
   <div class="row"><span class="rk">소요시간</span><span class="rv"><em>조건 ${S.tConds} × 반복 ${S.tReps} × ${S.tMin}분 + 준비 ${S.tSetup||0}분 ≈ 총 ${totalMin}분</em></span></div>
+  <div class="row"><span class="rk">시약</span><span class="rv"><em>${reagTxt||"—"}</em></span></div>
+  <div class="row"><span class="rk">기구</span><span class="rv"><em>${toolTxt||"—"}</em></span></div>
   <div class="row"><span class="rk">절차</span><span class="rv"><em>${procTxt||"—"}</em></span></div>
   <div class="row"><span class="rk">주요 장비</span><span class="rv"><em>${t.gear}</em></span></div>`;
 }
@@ -926,8 +985,10 @@ function sync(){
 
  const timeOK=(+S.tConds>0)&&(+S.tReps>0)&&(+S.tMin>0);
  const errOK=S.errForm!==null&&(S.errForm===0?(S.errVals.x&&S.errVals.dx):(S.errVals.v1&&S.errVals.e1&&S.errVals.v2&&S.errVals.e2));
+ const reagOK=S.reagents.filter(r=>r.name.trim()&&r.amount.trim()).length>=1;
+ const toolOK=S.tools.filter(x=>x.name.trim()).length>=1;
  const procOK=S.proc.filter(p=>p.desc.trim()&&+p.min>0).length>=3;
- const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&procOK;
+ const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&reagOK&&toolOK&&procOK;
 
  $("d1").textContent=S.topic?"✓":"";$("d2").textContent=ax?"✓":"";
  $("d3").textContent=mqOK?"✓":"";$("d4").textContent=hdOK?"✓":"";$("d5").textContent=pdOK?"✓":"";
@@ -939,7 +1000,7 @@ function sync(){
  $("toStep5").disabled=!hdOK;
  $("p-warn").textContent=hdOK?"":(S.ctrls.length<2?"고정할 변인을 최소 2개 고르세요.":(S.plot===null?"그릴 그래프를 고르세요.":"예비실험에서 확인할 것을 쓰세요."));
  $("toStep6").disabled=!pdOK;
- $("pd-warn").textContent=pdOK?"":(!S.predict.trim()?"사전 예측을 쓰세요.":(!timeOK?"소요시간 계산의 빈 칸을 채우세요.":(!errOK?"오차의 영향 확인에 값을 입력하세요.":"절차를 최소 3단계 채우세요.")));
+ $("pd-warn").textContent=pdOK?"":(!S.predict.trim()?"사전 예측을 쓰세요.":(!timeOK?"소요시간 계산의 빈 칸을 채우세요.":(!errOK?"오차의 영향 확인에 값을 입력하세요.":(!reagOK?"시약을 최소 1개(이름·사용량) 입력하세요.":(!toolOK?"기구를 최소 1개 입력하세요.":"절차를 최소 3단계 채우세요.")))));
 
  document.querySelectorAll("#rail button").forEach(b=>{
    const s=+b.dataset.s;
@@ -1001,6 +1062,12 @@ ${S.predict.trim()}
 형태: ${S.errForm!==null?ERR_FORMS[S.errForm].t:"-"}
 ${document.getElementById("errResult")?document.getElementById("errResult").innerText:""}
 
+[준비물 · 시약]
+${S.reagents.filter(r=>r.name.trim()).map(r=>`· ${r.name}${r.amount?` — ${r.amount}`:""}${r.state?` (${r.state})`:""}`).join("\n")||"-"}
+
+[준비물 · 기구]
+${S.tools.filter(x=>x.name.trim()).map(x=>`· ${x.name}${x.qty?` — ${x.qty}`:""}`).join("\n")||"-"}
+
 [실험 절차]
 ${procTxt}
 
@@ -1019,6 +1086,8 @@ $("pilot").oninput=e=>{S.pilot=e.target.value;sync()};
 $("predict").oninput=e=>{S.predict=e.target.value;sync()};
 ["tConds","tReps","tMin","tSetup"].forEach(id=>$(id).addEventListener("input",e=>{S[id]=e.target.value;timeCalc();sync()}));
 $("addStep").onclick=()=>{S.proc.push({desc:"",min:""});procRender();sync()};
+$("addReagent").onclick=()=>{S.reagents.push({name:"",amount:"",state:""});reagRender();sync()};
+$("addTool").onclick=()=>{S.tools.push({name:"",qty:""});toolRender();sync()};
 $("team").oninput=e=>{S.team=e.target.value;card()};
 $("copyBtn").onclick=async()=>{
  try{await navigator.clipboard.writeText(text());$("okmsg").textContent="복사했습니다.";}
@@ -1032,11 +1101,12 @@ $("dlBtn").onclick=()=>{
 };
 $("resetBtn").onclick=()=>{
  Object.assign(S,{topic:null,v:null,m:null,p:null,mq:"",unknown:"",checks:[0,0,0,0,0],ctrls:[],plot:null,pilot:"",team:"",
-   predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]});
+   predict:"",tConds:"",tReps:"",tMin:"",tSetup:"",errForm:null,errVals:{},proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}],
+   reagents:[{name:"",amount:"",state:""},{name:"",amount:"",state:""}], tools:[{name:"",qty:""},{name:"",qty:""}]});
  $("mq").value="";$("unknown").value="";$("pilot").value="";$("team").value="";$("predict").value="";
  ["tConds","tReps","tMin","tSetup"].forEach(id=>$(id).value="");
  document.documentElement.style.setProperty("--topic","#3B4FC4");
- try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+ try{ localStorage.removeItem(SAVE_KEY()); }catch(e){}
  grid();checks();precisionDesign();sync();go(1);
 };
 
@@ -1048,10 +1118,13 @@ function snapshot(){
  const t=S.topic;
  const P=(S.p!==null)?PURPOSE[S.p]:null;
  const g=(t&&S.plot!==null)?t.G[S.plot]:null;
+ const reagTxt=S.reagents.filter(r=>r.name.trim()).map(r=>`${r.name}${r.amount?` ${r.amount}`:""}${r.state?`(${r.state})`:""}`).join(", ");
+ const toolTxt=S.tools.filter(x=>x.name.trim()).map(x=>`${x.name}${x.qty?` ${x.qty}`:""}`).join(", ");
  return {
   topicN:t?t.n:null, v:S.v,m:S.m,p:S.p,mq:S.mq,unknown:S.unknown,checks:S.checks,
   ctrls:S.ctrls,plot:S.plot,pilot:S.pilot,team:S.team,predict:S.predict,tConds:S.tConds,tReps:S.tReps,
-  tMin:S.tMin,tSetup:S.tSetup,errForm:S.errForm,errVals:S.errVals,proc:S.proc,savedAt:Date.now(),
+  tMin:S.tMin,tSetup:S.tSetup,errForm:S.errForm,errVals:S.errVals,proc:S.proc,
+  reagents:S.reagents, tools:S.tools, savedAt:Date.now(),
   code: code(),
   // 사람이 읽을 요약 (기록장·현황판이 그대로 표시)
   topicName:t?t.name:"", unit:t?t.unit:"", gear:t?t.gear:"",
@@ -1060,7 +1133,8 @@ function snapshot(){
   Mname:(t&&S.m!==null)?t.M[S.m][0]:"", Mdesc:(t&&S.m!==null)?t.M[S.m][1]:"",
   Pname:P?P.t:"", Pdesc:P?P.d:"",
   ctrlNames:(t&&S.ctrls.length)?S.ctrls.map(i=>t.C[i]):[],
-  graphX:g?g[0]:"", graphY:g?g[1]:"", graphMeaning:g?g[2]:""
+  graphX:g?g[0]:"", graphY:g?g[1]:"", graphMeaning:g?g[2]:"",
+  reagentsText: reagTxt, toolsText: toolTxt
  };
 }
 
@@ -1093,7 +1167,9 @@ function applySnapshot(snap){
   topic, v:snap.v??null, m:snap.m??null, p:snap.p??null, mq:snap.mq||"", unknown:snap.unknown||"",
   checks:snap.checks||[0,0,0,0,0], ctrls:snap.ctrls||[], plot:snap.plot??null, pilot:snap.pilot||"", team:snap.team||"",
   predict:snap.predict||"", tConds:snap.tConds||"", tReps:snap.tReps||"", tMin:snap.tMin||"", tSetup:snap.tSetup||"",
-  errForm:snap.errForm??null, errVals:snap.errVals||{}, proc:snap.proc&&snap.proc.length?snap.proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}]
+  errForm:snap.errForm??null, errVals:snap.errVals||{}, proc:snap.proc&&snap.proc.length?snap.proc:[{desc:"",min:""},{desc:"",min:""},{desc:"",min:""}],
+  reagents:snap.reagents&&snap.reagents.length?snap.reagents:[{name:"",amount:"",state:""},{name:"",amount:"",state:""}],
+  tools:snap.tools&&snap.tools.length?snap.tools:[{name:"",qty:""},{name:"",qty:""}]
  });
  if(topic) document.documentElement.style.setProperty("--topic",topic.color);
 
@@ -1111,8 +1187,10 @@ function applySnapshot(snap){
  const hdOK=S.ctrls.length>=2&&S.plot!==null&&S.pilot.trim().length>4;
  const timeOK=(+S.tConds>0)&&(+S.tReps>0)&&(+S.tMin>0);
  const errOK=S.errForm!==null&&(S.errForm===0?(S.errVals.x&&S.errVals.dx):(S.errVals.v1&&S.errVals.e1&&S.errVals.v2&&S.errVals.e2));
+ const reagOK=S.reagents.filter(r=>r.name.trim()&&r.amount.trim()).length>=1;
+ const toolOK=S.tools.filter(x=>x.name.trim()).length>=1;
  const procOK=S.proc.filter(pr=>pr.desc.trim()&&+pr.min>0).length>=3;
- const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&procOK;
+ const pdOK=S.predict.trim().length>8&&timeOK&&errOK&&reagOK&&toolOK&&procOK;
  go(pdOK?6:hdOK?5:mqOK?4:ax?3:topic?2:1);
  return true;
 }
