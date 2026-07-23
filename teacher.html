@@ -30,6 +30,7 @@ header{background:rgba(245,245,247,0.8);backdrop-filter:saturate(180%) blur(20px
 .sbox b{color:var(--ink);font-weight:700}
 .sbox.bad{background:#fef1f0;color:var(--warn)}
 .sbox.good{background:#eef7f1;color:var(--ok)}
+.who-badge{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
 
 main{padding:40px 0 100px}
 .eyebrow{font-size:13px;letter-spacing:0;color:var(--accent);margin-bottom:8px;font-weight:600}
@@ -148,6 +149,9 @@ td em{font-style:normal;color:var(--ink-3);font-size:12.5px}
 </style>
 </head>
 <body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 
 <div class="gtb"><div class="gtb-in">
   <a href="index.html" class="gtb-home">
@@ -159,28 +163,23 @@ td em{font-style:normal;color:var(--ink-3);font-size:12.5px}
 
 <header><div class="wrap"><div class="hbar">
   <div class="brand"><h1 style="display:inline">고급화학 탐구 현황판</h1><span>Teacher Console</span></div>
-  <div class="stat" id="stat"></div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="whoBadge" class="who-badge" style="display:none"></span>
+    <div class="stat" id="stat"></div>
+  </div>
 </div></div></header>
 
 <main class="wrap">
 
-<section>
-  <div class="eyebrow">Input</div>
-  <h2>팀 설계 코드 붙여넣기</h2>
-  <p class="lede">팀이 낸 <b>설계 카드를 통째로 붙여넣거나</b>, <code style="font-family:var(--mono)">3팀 착화 &nbsp;T03·V2·M1·PB</code> 형식으로 한 줄씩 적으세요. 여러 팀을 한꺼번에 넣어도 됩니다.</p>
-  <textarea id="src" placeholder="1팀 크로마    T01·V1·M1·PA
-2팀 스펙트라  T01·V2·M1·PB
-3팀 킬레인    T03·V1·M2·PB
-4팀 하버      T07·V1·M1·PD
-…
-
-또는 학생이 내려받은 설계 카드 텍스트를 그대로 붙여넣어도 인식합니다."></textarea>
-  <div class="bar">
-    <button class="btn" id="run">현황 분석</button>
-    <button class="btn ghost" id="demo">예시 채우기</button>
-    <button class="btn ghost" id="clr">비우기</button>
-    <span class="note" id="parsed"></span>
-  </div>
+<section id="teamView" style="display:none">
+  <div class="eyebrow">Overview</div>
+  <h2>전체 탐구 현황</h2>
+  <p class="lede">모든 팀의 <b>설계 코드 · 메타 질문 · 사용 장비</b>를 한눈에 봅니다. 실시간으로 갱신됩니다.</p>
+  <table><thead><tr>
+    <th style="width:38px"></th><th>팀</th><th style="width:118px">설계 코드</th>
+    <th>메타 질문</th><th style="width:140px">사용 장비</th>
+  </tr></thead><tbody id="simpleRows"></tbody></table>
+  <div class="empty" id="simpleEmpty" style="display:none;margin-top:14px">아직 등록된 팀 설계가 없습니다.</div>
 </section>
 
 <div id="result" style="display:none">
@@ -229,9 +228,28 @@ td em{font-style:normal;color:var(--ink-3);font-size:12.5px}
   <div id="cover"></div>
 </section>
 
+<section>
+  <div class="eyebrow">Admin</div>
+  <h2>팀 계정 관리</h2>
+  <p class="lede">팀 계정을 만들고, 비밀번호를 잊었을 때 재설정합니다.</p>
+  <div class="card" style="background:var(--paper-2);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end">
+      <div><label class="note" style="display:block;margin-bottom:6px">팀 이름</label>
+        <input type="text" id="newTeamName" placeholder="예: 9팀 오비탈" style="width:100%;padding:10px 12px;border:2px solid var(--rule);border-radius:10px;font-size:14px"></div>
+      <div><label class="note" style="display:block;margin-bottom:6px">초기 비밀번호</label>
+        <input type="text" id="newTeamPw" placeholder="예: chem9" style="width:100%;padding:10px 12px;border:2px solid var(--rule);border-radius:10px;font-size:14px"></div>
+      <button class="btn" id="createTeamBtn">계정 만들기</button>
+    </div>
+    <p class="note" id="createTeamMsg" style="margin-top:10px"></p>
+  </div>
+  <table><thead><tr><th>팀</th><th style="width:160px">비밀번호 재설정</th><th style="width:70px"></th></tr></thead>
+    <tbody id="teamAcctRows"></tbody>
+  </table>
+</section>
+
 </div>
 
-<div id="blank" class="empty">설계 코드를 붙여넣고 <b>현황 분석</b>을 누르세요.</div>
+<div id="blank" class="empty">로그인하면 현황이 표시됩니다.</div>
 
 <p style="font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:0.06em;padding-top:40px">
   설계 코드 = T주제 · V변수 · M방법 · P목적 &nbsp;|&nbsp; 같은 주제라도 3축 중 하나 이상 달라야 통과
@@ -252,7 +270,7 @@ const T={
  6:{name:"자발성",c:"#2E8A80",u:"III 에너지",V:["염 종류","농도","온도","용매"],M:[["자작 열량계",["TEMP"]],["K → ΔG",["SPEC"]],["헤스 법칙 계산",["TEMP"]]]},
  7:{name:"평형의 이동",c:"#C2457F",u:"III·IV",V:["온도","농도","이온 세기","용매 조성"],M:[["분광 + 온도",["SPEC","TEMP"]],["적정",["PH"]],["수치 최적화",["SIM"]]]},
  8:{name:"속도식과 메커니즘",c:"#3A2E6B",u:"VI 속도",V:["반응물 농도","온도","이온 세기","촉매 유무"],M:[["분광 실시간",["SPEC"]],["CO₂·압력 센서",["PRES"]],["육안 시간 측정",[]],["ODE 수치적분",["SIM"]]]},
- 9:{name:"촉매",c:"#6B4423",u:"VI 속도",V:["촉매 종류","촉매 양","온도","기질 농도"],M:[["기체 발생 속도",["PRES"]],["온도 상승 속도",["TEMP"]],["아레니우스 플롯",["PRES"]]]},
+ 9:{name:"촉매",c:"#6B4423",u:"VI 속도",V:["촉매 종류","촉매 양","온도","기질 농도","리간드·조건(이성질체)"],M:[["기체 발생 속도",["PRES"]],["온도 상승 속도",["TEMP"]],["아레니우스 플롯",["PRES"]],["분광 이성질체 비율",["SPEC"]]]},
  10:{name:"전지 전위",c:"#B87333",u:"V 전기화학",V:["농도","리간드 첨가","침전제","pH","온도"],M:[["전압계 직접 측정",["VOLT"]],["농도차 전지",["VOLT"]],["분광 교차검증",["SPEC","VOLT"]]]},
  11:{name:"총괄성",c:"#B33A3A",u:"II 용액",V:["용질 종류","농도","용질 전하","온도"],M:[["원심분리 + 흡광",["CENT","SPEC"]],["전도도",["COND"]],["어는점 내림",["TEMP"]]]},
  12:{name:"고체 구조",c:"#55606E",u:"II 용액",V:["결정 구조","이온 반지름","결정화 조건","온도"],M:[["밀도 측정",["BAL"]],["용해 속도 비교",["SPEC"]],["Born–Haber 계산",["SIM"]]]}
@@ -373,24 +391,87 @@ function render(A,byTopic,load,pc,cov){
  }).join("")+`</div>`;
 }
 
-$("run").onclick=()=>{
- teams=parse($("src").value);
- $("parsed").textContent=teams.length?`${teams.length}팀 인식됨`:"코드를 찾지 못했습니다. T01·V1·M1·PA 형식인지 확인하세요.";
- if(teams.length)analyze();
- else{$("result").style.display="none";$("blank").style.display="block";}
+function docsToTeams(docs){
+ return docs.filter(d=>d.topicN!=null && d.v!=null && d.m!=null && d.p!=null && T[d.topicN])
+  .map(d=>{
+   const t=T[d.topicN], M=t.M[d.m];
+   return {
+    name: d.team || d.teamId, teamId: d.teamId,
+    t: d.topicN, v: d.v+1, m: d.m+1, p: "ABCD"[d.p],
+    code: d.code || `T${String(d.topicN).padStart(2,"0")}·V${d.v+1}·M${d.m+1}·P${"ABCD"[d.p]}`,
+    mq: d.mq || "(아직 메타 질문 없음)",
+    gearReadable: (M&&M[1].length) ? M[1].map(g=>GEAR[g]).join(", ") : "—"
+   };
+  });
+}
+
+function renderSimple(){
+ $("simpleRows").innerHTML = teams.map(x=>`<tr>
+   <td><span class="dot" style="background:${T[x.t].c}"></span></td>
+   <td><b>${esc(x.name)}</b><br><em>${T[x.t].name}</em></td>
+   <td class="code">${x.code}</td>
+   <td>${esc(x.mq)}</td>
+   <td><em>${x.gearReadable}</em></td>
+  </tr>`).join("");
+ $("simpleEmpty").style.display = teams.length? "none":"block";
+}
+
+/* ---------- 관리자: 팀 계정 관리 ---------- */
+async function renderTeamAccounts(){
+ const list = await AUTH.listTeams();
+ const normal = list.filter(t=>!t.isAdmin);
+ $("teamAcctRows").innerHTML = normal.map(t=>`<tr>
+   <td><b>${esc(t.name)}</b></td>
+   <td><input type="text" class="pwReset" data-id="${t.id}" placeholder="새 비밀번호" style="width:100%;padding:8px 10px;border:1.5px solid var(--rule);border-radius:8px;font-size:13px"></td>
+   <td><button class="btn ghost sm resetPwBtn" data-id="${t.id}" style="padding:7px 12px;font-size:12px">재설정</button></td>
+  </tr>`).join("") || `<tr><td colspan="3"><em style="color:var(--ink-3)">아직 만든 팀 계정이 없습니다.</em></td></tr>`;
+ document.querySelectorAll(".resetPwBtn").forEach(b=>b.onclick=async()=>{
+   const id=b.dataset.id;
+   const input=document.querySelector(`.pwReset[data-id="${id}"]`);
+   const pw=input.value.trim();
+   if(!pw){ input.placeholder="새 비밀번호를 입력하세요"; return; }
+   await AUTH.resetPassword(id, pw);
+   input.value=""; input.placeholder="재설정 완료 ✓";
+   setTimeout(()=>input.placeholder="새 비밀번호",1500);
+ });
+}
+$("createTeamBtn").onclick=async()=>{
+ const name=$("newTeamName").value.trim(), pw=$("newTeamPw").value.trim();
+ if(!name||!pw){ $("createTeamMsg").textContent="팀 이름과 초기 비밀번호를 모두 입력하세요."; return; }
+ await AUTH.createTeam(name, pw);
+ $("newTeamName").value=""; $("newTeamPw").value="";
+ $("createTeamMsg").innerHTML=`<span style="color:var(--ok)">"${esc(name)}" 계정을 만들었습니다.</span>`;
+ renderTeamAccounts();
 };
-$("demo").onclick=()=>{
- $("src").value=`1팀 크로마    T01·V1·M1·PA
-2팀 스펙트라  T01·V2·M1·PB
-3팀 킬레인    T03·V1·M1·PB
-4팀 하버      T07·V1·M1·PD
-5팀 클락      T08·V1·M1·PA
-6팀 카탈      T09·V1·M1·PC
-7팀 오스모    T11·V1·M1·PD
-8팀 볼트      T10·V2·M2·PB`;
- $("run").click();
-};
-$("clr").onclick=()=>{$("src").value="";teams=[];$("parsed").textContent="";$("result").style.display="none";$("blank").style.display="block";};
+
+/* ---------- 로그인 후 초기화 ---------- */
+let CURRENT_TEAM=null;
+if(typeof LoginGate!=="undefined"){
+ LoginGate.inject(async(me)=>{
+  CURRENT_TEAM=me;
+  document.getElementById("whoBadge").textContent = me.name + (me.isAdmin?" · 관리자":"");
+  document.getElementById("whoBadge").style.display="inline-flex";
+  $("blank").style.display="none";
+
+  if(me.isAdmin){
+   $("result").style.display="block";
+   $("teamView").style.display="none";
+   renderTeamAccounts();
+  } else {
+   $("teamView").style.display="block";
+   $("result").style.display="none";
+  }
+
+  // 실시간 구독: 전체 팀 설계 변화가 있을 때마다 다시 그림
+  if(typeof STORE!=="undefined"){
+   STORE.watchAllDesigns(docs=>{
+    teams = docsToTeams(docs);
+    renderSimple();
+    if(me.isAdmin) analyze();
+   });
+  }
+ });
+}
 </script>
 <script>
 /* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */

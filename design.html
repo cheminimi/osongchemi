@@ -164,6 +164,7 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 .savebtn{font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;padding:8px 15px;
   border:none;background:var(--paper-2);color:var(--ink-2);border-radius:980px;box-shadow:var(--shadow);
   display:flex;align-items:center;gap:7px;transition:.16s}
+.who-badge{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
 .savebtn:hover{box-shadow:var(--shadow-lg)}
 .savebtn #saveStatus{color:var(--ok);font-size:9px}
 .savebtn.pending #saveStatus{color:var(--ink-3)}
@@ -249,6 +250,9 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 </style>
 </head>
 <body>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 
 <div class="gtb"><div class="gtb-in">
   <a href="index.html" class="gtb-home">
@@ -263,6 +267,7 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
     <div class="hbar">
       <div class="brand"><h1>고급화학 팀 탐구 설계실</h1><span>Team Inquiry Design</span></div>
       <div style="display:flex;align-items:center;gap:9px">
+        <span id="whoBadge" class="who-badge" style="display:none"></span>
         <button class="savebtn" id="saveToggle"><span id="saveStatus">●</span> 저장</button>
         <div class="code-chip empty" id="codeChip"><small>설계 코드</small><span id="codeVal">— · — · — · —</span></div>
       </div>
@@ -545,17 +550,17 @@ const T=[
  G:[["log [초기 농도]","log (초기 속도)","기울기가 곧 반응 차수다."],["1/T (K⁻¹)","ln k","기울기 = −Ea/R."]],
  R:["반응이 너무 빨라 초기 구간을 통째로 놓친다. → 예비실험에서 농도를 낮춰 속도를 조절하라.","혼합 시각과 측정 시작 시각이 어긋난다. → 두 사람이 동시에 시작하는 절차를 미리 짜라."]},
 
-{n:9,name:"촉매",color:"#6B4423",unit:"VI 반응 속도",gear:"압력 · 온도 센서",obs:"활성화 에너지 Ea",
- hook:"교과서는 \"촉매는 평형을 못 바꾼다\"고 한다. 그런데 하버법은 촉매 없이는 공정 자체가 성립하지 않는다.",
- wall:"화1·2는 \"Ea를 낮춘다\"로 끝난다. 촉매가 경로 자체를 바꾼다는 개념이 없다.",
- weapon:"반응 메커니즘 변경 · 균일/불균일 촉매 · 아레니우스 · 충돌 모형",
- next:"촉매가 경로를 바꾼다면 Ea가 얼마나 낮아질까? 효소는 왜 무기 촉매와 다른 곡선을 그릴까?",
- V:[["촉매 종류","MnO₂ / KI / 카탈레이스(감자)"],["촉매 농도·양","속도와 촉매량의 관계"],["온도","촉매 유무에 따른 Ea 차이"],["기질 농도","포화가 일어나는가"]],
- M:[["기체 발생 속도","O₂ 부피·압력 추적"],["온도 상승 속도","발열 추적"],["아레니우스 플롯","ln k vs 1/T"]],
- C:["기질(H₂O₂) 농도","온도","촉매 입자 크기·표면적","용액 부피","용기 밀폐 상태"],
- G:[["1/T (K⁻¹)","ln k","촉매별 Ea를 나란히 비교한다."],["기질 농도 (M)","초기 속도","효소는 휘고 무기 촉매는 직선이다. 이 차이가 핵심."]],
- R:["불균일 촉매는 표면적이 제각각이라 재현성이 최악이다. → 입자 크기를 통일하거나 질량 대신 표면적을 기준 삼아라.","기체가 새면 발생량이 작게 나온다. → 밀폐 검사를 먼저 하라."],
- safe:"고농도 과산화수소는 <b>피부·눈에 화상</b>을 입힙니다. 3~6% 이하로 희석해 쓰고 보안경을 착용하세요."},
+{n:9,name:"촉매",color:"#6B4423",unit:"VI 반응 속도",gear:"압력 · 온도 센서 · 분광광도계",obs:"활성화 에너지 Ea 또는 생성물의 구조(이성질체 비율)",
+ hook:"교과서는 \"촉매는 평형을 못 바꾼다\"고 한다. 그런데 하버법은 촉매 없이는 공정 자체가 성립하지 않는다. 더 나아가 지글러-나타 촉매는 속도가 아니라 사슬의 입체구조 자체를 결정한다.",
+ wall:"화1·2는 \"Ea를 낮춘다\"로 끝난다. 촉매가 경로 자체를 바꾼다는 개념도, 하물며 촉매가 무엇이 만들어지는지(구조·이성질체)를 결정한다는 개념도 없다.",
+ weapon:"반응 메커니즘 변경 · 균일/불균일 촉매 · 아레니우스 · 충돌 모형 · 입체 선택성 · 열역학적 산물 vs 속도론적 산물",
+ next:"촉매가 경로를 바꾼다면 Ea가 얼마나 낮아질까? 조건이 반응의 속도가 아니라 무엇이 만들어지는지를 바꿀 수도 있을까?",
+ V:[["촉매 종류","MnO₂ / KI / 카탈레이스(감자)"],["촉매 농도·양","속도와 촉매량의 관계"],["온도","촉매 유무에 따른 Ea 차이"],["기질 농도","포화가 일어나는가"],["리간드·반응 조건 — 만들어지는 이성질체","Co(en)₂Cl₂ 합성 시 온도·시간에 따른 cis/trans 비율"]],
+ M:[["기체 발생 속도","O₂ 부피·압력 추적"],["온도 상승 속도","발열 추적"],["아레니우스 플롯","ln k vs 1/T"],["분광광도계로 이성질체 비율 정량","cis(보라)·trans(초록) 흡광도비로 조성 추정"]],
+ C:["기질(H₂O₂) 농도","온도","촉매 입자 크기·표면적","용액 부피","용기 밀폐 상태","금속 총 농도","반응 pH","산화제 첨가량"],
+ G:[["1/T (K⁻¹)","ln k","촉매별 Ea를 나란히 비교한다."],["기질 농도 (M)","초기 속도","효소는 휘고 무기 촉매는 직선이다. 이 차이가 핵심."],["반응 온도 (°C)","cis 이성질체 비율 (%)","조건이 속도가 아니라 무엇이 만들어지는지를 바꾼다는 것을 보여준다."]],
+ R:["불균일 촉매는 표면적이 제각각이라 재현성이 최악이다. → 입자 크기를 통일하거나 질량 대신 표면적을 기준 삼아라.","기체가 새면 발생량이 작게 나온다. → 밀폐 검사를 먼저 하라.","cis와 trans는 색이 비슷해 보일 때가 있다. → 흡수 스펙트럼 전체를 비교해 λmax 차이로 판별 기준을 먼저 세워라."],
+ safe:"고농도 과산화수소는 <b>피부·눈에 화상</b>을 입힙니다. 3~6% 이하로 희석해 쓰고 보안경을 착용하세요. 코발트 착물 합성 시 <b>코발트 화합물은 피부 자극·알레르기 유발 가능</b> — 장갑 착용, 폐액은 중금속 용기에 분리 배출하세요."},
 
 {n:10,name:"전지 전위",color:"#B87333",unit:"V 전기 화학",gear:"PASCO 전압계",obs:"전극 전위 E",
  hook:"표에는 Cu²⁺/Cu = +0.34 V라고 적혀 있다. 암모니아를 넣으면 그 값이 바뀐다.",
@@ -891,25 +896,50 @@ $("resetBtn").onclick=()=>{
  grid();checks();precisionDesign();sync();go(1);
 };
 
-/* ===== 저장/불러오기 (로그인 없이) ===== */
-const SAVE_KEY="gochem_design_v1";
+/* ===== 저장/불러오기 (팀 로그인 기반) ===== */
+let CURRENT_TEAM = null; // {id, name, isAdmin}
+const SAVE_KEY = () => "gochem_design_v1_" + (CURRENT_TEAM ? CURRENT_TEAM.id : "guest");
 
 function snapshot(){
- return {topicN:S.topic?S.topic.n:null,v:S.v,m:S.m,p:S.p,mq:S.mq,unknown:S.unknown,checks:S.checks,
+ const t=S.topic;
+ const P=(S.p!==null)?PURPOSE[S.p]:null;
+ const g=(t&&S.plot!==null)?t.G[S.plot]:null;
+ return {
+  topicN:t?t.n:null, v:S.v,m:S.m,p:S.p,mq:S.mq,unknown:S.unknown,checks:S.checks,
   ctrls:S.ctrls,plot:S.plot,pilot:S.pilot,team:S.team,predict:S.predict,tConds:S.tConds,tReps:S.tReps,
-  tMin:S.tMin,tSetup:S.tSetup,errForm:S.errForm,errVals:S.errVals,proc:S.proc,savedAt:Date.now()};
+  tMin:S.tMin,tSetup:S.tSetup,errForm:S.errForm,errVals:S.errVals,proc:S.proc,savedAt:Date.now(),
+  code: code(),
+  // 사람이 읽을 요약 (기록장·현황판이 그대로 표시)
+  topicName:t?t.name:"", unit:t?t.unit:"", gear:t?t.gear:"",
+  observe:t?t.hook:"", wall:t?t.wall:"", concept:t?t.weapon:"", next:t?t.next:"",
+  Vname:(t&&S.v!==null)?t.V[S.v][0]:"", Vdesc:(t&&S.v!==null)?t.V[S.v][1]:"",
+  Mname:(t&&S.m!==null)?t.M[S.m][0]:"", Mdesc:(t&&S.m!==null)?t.M[S.m][1]:"",
+  Pname:P?P.t:"", Pdesc:P?P.d:"",
+  ctrlNames:(t&&S.ctrls.length)?S.ctrls.map(i=>t.C[i]):[],
+  graphX:g?g[0]:"", graphY:g?g[1]:"", graphMeaning:g?g[2]:""
+ };
 }
 
+let _cloudTimer=null;
 function autosave(){
- try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); markSaved(); }
+ try{ localStorage.setItem(SAVE_KEY(), JSON.stringify(snapshot())); markSaved("local"); }
  catch(e){ /* 저장 불가 환경 — 조용히 무시, 저장 코드로 대체 가능 */ }
+ // 클라우드 저장은 디바운스 (팀당 문서 1개, 잦은 쓰기 방지)
+ if(CURRENT_TEAM && typeof STORE!=="undefined"){
+  clearTimeout(_cloudTimer);
+  _cloudTimer=setTimeout(async ()=>{
+   const ok = await STORE.saveDesign(CURRENT_TEAM.id, snapshot());
+   markSaved(ok?"cloud":"cloud-fail");
+  },700);
+ }
 }
 
-function markSaved(){
+function markSaved(where){
  const b=$("saveToggle"); if(!b) return;
  b.classList.remove("pending");
  const now=new Date();
- b.title="마지막 자동 저장 "+now.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
+ const label = where==="cloud" ? "클라우드에 저장됨 " : where==="cloud-fail" ? "이 브라우저에만 저장됨 (연결 확인 필요) " : "이 브라우저에 저장됨 ";
+ b.title=label+now.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"});
 }
 
 function applySnapshot(snap){
@@ -943,9 +973,14 @@ function applySnapshot(snap){
  return true;
 }
 
-function tryAutoload(){
+/* 클라우드 우선, 없으면 이 브라우저 저장본, 그것도 없으면 빈 상태 */
+async function tryAutoload(){
+ if(CURRENT_TEAM && typeof STORE!=="undefined"){
+  const cloud = await STORE.loadDesign(CURRENT_TEAM.id);
+  if(cloud){ applySnapshot(cloud); return true; }
+ }
  try{
-  const raw=localStorage.getItem(SAVE_KEY);
+  const raw=localStorage.getItem(SAVE_KEY());
   if(!raw) return false;
   return applySnapshot(JSON.parse(raw));
  }catch(e){ return false; }
@@ -956,10 +991,11 @@ function fromB64(str){ return JSON.parse(decodeURIComponent(escape(atob(str.trim
 
 $("saveToggle").onclick=()=>{
  $("savePanel").classList.toggle("open");
- const raw=localStorage.getItem(SAVE_KEY);
- $("autoNote").textContent=raw
-  ?`이 브라우저에 자동 저장되고 있습니다 · 마지막 저장 ${new Date(JSON.parse(raw).savedAt).toLocaleString("ko-KR")}`
-  :"아직 저장된 내용이 없습니다. 입력을 시작하면 자동으로 저장됩니다.";
+ const raw=localStorage.getItem(SAVE_KEY());
+ $("autoNote").textContent = CURRENT_TEAM
+  ? `${CURRENT_TEAM.name} 계정으로 클라우드에 자동 저장되고 있습니다. 다른 컴퓨터에서 같은 계정으로 로그인하면 이어집니다.`
+  : (raw ? `이 브라우저에 자동 저장되고 있습니다 · 마지막 저장 ${new Date(JSON.parse(raw).savedAt).toLocaleString("ko-KR")}`
+         : "아직 저장된 내용이 없습니다. 입력을 시작하면 자동으로 저장됩니다.");
 };
 $("makeCodeBtn").onclick=()=>{ $("saveOut").value=toB64(snapshot()); };
 $("copyCodeBtn").onclick=async()=>{
@@ -979,9 +1015,26 @@ $("loadCodeBtn").onclick=()=>{
  }
 };
 
+/* ===== 초기화: 로그인 후에만 시작 ===== */
 grid();checks();precisionDesign();
-tryAutoload();
-sync();
+if(typeof LoginGate!=="undefined"){
+ LoginGate.inject(async(me)=>{
+  CURRENT_TEAM = me;
+  renderWho(me);
+  await tryAutoload();
+  sync();
+ });
+}else{
+ tryAutoload();
+ sync();
+}
+
+function renderWho(me){
+ const el=document.getElementById("whoBadge");
+ if(!el) return;
+ el.textContent = me.name + (me.isAdmin?" · 관리자":"");
+ el.style.display="inline-flex";
+}
 </script>
 <script>
 /* shell(index.html) 안에서 열리면 자체 내비를 숨기고 상단 여백을 줄인다 */
