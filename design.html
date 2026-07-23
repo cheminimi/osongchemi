@@ -408,7 +408,7 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
   </div>
 
   <div class="sec">
-    <div class="sec-h"><b>③ 오차 전파 계산</b><span>이 오차로 조건들을 구별할 수 있는가</span></div>
+    <div class="sec-h"><b>③ 오차의 영향 확인</b><span>이 오차로 조건들을 구별할 수 있는가</span></div>
     <div class="sec-b">
       <label class="flab">측정값 형태</label>
       <div class="pills" id="errForm"></div>
@@ -704,7 +704,7 @@ function errCalc(){
  const f=S.errForm;
  if(f===null){$("errInputs").innerHTML="";$("errResult").innerHTML="";return;}
  const v=S.errVals;
- const num=(k,ph)=>`<div><label class="flab">${ph}</label><input type="number" step="any" data-ek="${k}" value="${v[k]??""}"></div>`;
+ const num=(k,ph)=>`<div><label class="flab">${ph}</label><input type="text" inputmode="decimal" placeholder="숫자만 또는 단위 포함(예: 580nm)" data-ek="${k}" value="${v[k]??""}"></div>`;
  if(f===0){
    $("errInputs").innerHTML=num("x","측정값 x")+num("dx","측정 오차 δx (절대값)");
  } else {
@@ -712,18 +712,21 @@ function errCalc(){
  }
  document.querySelectorAll("[data-ek]").forEach(inp=>inp.oninput=e=>{S.errVals[e.target.dataset.ek]=e.target.value;errCalc();sync();});
 
+ const num_=(s)=>{ const n=parseFloat(s); return isNaN(n)?null:n; };
  let html="";
  if(f===0){
-   const x=+v.x,dx=+v.dx;
-   if(x){
+   const x=num_(v.x), dx=num_(v.dx);
+   if(x!==null && dx!==null && x!==0){
      const rel=Math.abs(dx/x)*100;
      html=`상대오차 ≈ <span class="tr-big">${rel.toFixed(1)}%</span> — 역수형이므로 결과값도 같은 상대오차를 갖습니다.<br>`+
        (rel>15?`<span class="tr-warn">15%를 넘습니다. 이웃한 조건끼리 이보다 값 차이가 작다면 구별이 어렵습니다.</span>`
               :`<span class="tr-ok">비교적 작습니다. 조건 간 차이가 이보다 크면 구별 가능성이 높습니다.</span>`);
+   } else if(v.x || v.dx){
+     html=`<span class="tr-warn">숫자를 못 읽었습니다. 단위는 숫자 뒤에 붙여주세요(예: 580nm, nm580 아님).</span>`;
    }
  } else {
-   const v1=+v.v1,e1=+v.e1,v2=+v.v2,e2=+v.e2;
-   if(v1&&v2){
+   const v1=num_(v.v1), e1=num_(v.e1), v2=num_(v.v2), e2=num_(v.e2);
+   if(v1!==null && v2!==null && e1!==null && e2!==null && v1!==0 && v2!==0){
      if(f===1){
        const rel=Math.sqrt((e1/v1)**2+(e2/v2)**2)*100;
        html=`합성 상대오차 ≈ <span class="tr-big">${rel.toFixed(1)}%</span> (두 상대오차의 제곱합)<br>`+
@@ -736,6 +739,8 @@ function errCalc(){
                   :rel>30?`<span class="tr-warn">오차가 차이의 ${rel.toFixed(0)}%나 됩니다. 이 차이는 오차 안에 묻힐 수 있습니다.</span>`
                   :`<span class="tr-ok">오차가 차이의 ${rel.toFixed(0)}% 수준입니다. 구별 가능성이 있습니다.</span>`);
      }
+   } else if(v.v1||v.e1||v.v2||v.e2){
+     html=`<span class="tr-warn">숫자를 못 읽었습니다. 단위는 숫자 뒤에 붙여주세요(예: 3.2mL, mL3.2 아님).</span>`;
    }
  }
  $("errResult").innerHTML=html;
@@ -807,7 +812,7 @@ function sync(){
  $("toStep5").disabled=!hdOK;
  $("p-warn").textContent=hdOK?"":(S.ctrls.length<2?"고정할 변인을 최소 2개 고르세요.":(S.plot===null?"그릴 그래프를 고르세요.":"예비실험에서 확인할 것을 쓰세요."));
  $("toStep6").disabled=!pdOK;
- $("pd-warn").textContent=pdOK?"":(!S.predict.trim()?"사전 예측을 쓰세요.":(!timeOK?"소요시간 계산의 빈 칸을 채우세요.":(!errOK?"오차 전파 계산의 값을 입력하세요.":"절차를 최소 3단계 채우세요.")));
+ $("pd-warn").textContent=pdOK?"":(!S.predict.trim()?"사전 예측을 쓰세요.":(!timeOK?"소요시간 계산의 빈 칸을 채우세요.":(!errOK?"오차의 영향 확인에 값을 입력하세요.":"절차를 최소 3단계 채우세요.")));
 
  document.querySelectorAll("#rail button").forEach(b=>{
    const s=+b.dataset.s;
@@ -865,7 +870,7 @@ ${S.predict.trim()}
 조건 ${S.tConds}개 × 반복 ${S.tReps}회 × 조건당 ${S.tMin}분 + 준비·정리 ${S.tSetup||0}분
 = 총 ${totalMin}분 (${Math.floor(totalMin/60)}시간 ${Math.round(totalMin%60)}분)
 
-[오차 전파 계산]
+[오차의 영향 확인]
 형태: ${S.errForm!==null?ERR_FORMS[S.errForm].t:"-"}
 ${document.getElementById("errResult")?document.getElementById("errResult").innerText:""}
 
