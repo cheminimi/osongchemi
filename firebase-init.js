@@ -58,11 +58,11 @@ const AUTH = {
 
   async _ensureAdminSeed() {
     if (!FIREBASE_READY) return;
-    const ref = db.collection("teams").doc("관리자");
+    const ref = db.collection("teams").doc("admin");
     const snap = await ref.get();
     if (!snap.exists) {
-      const hash = await this._hash("관리자");
-      await ref.set({ name: "관리자", passwordHash: hash, isAdmin: true, createdAt: Date.now() });
+      const hash = await this._hash("admin");
+      await ref.set({ name: "admin", passwordHash: hash, isAdmin: true, createdAt: Date.now() });
     }
   },
 
