@@ -35,6 +35,16 @@ body{font-family:var(--sans);background:var(--paper);color:var(--ink);
 .tab:hover{background:rgba(0,0,0,.06);color:var(--ink)}
 .tab.on{background:var(--ink);color:#fff}
 
+.whoami{display:flex;align-items:center;gap:9px;flex:none}
+.who-name{font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.who-out{font-family:var(--sans);font-size:11.5px;color:var(--ink-3);background:none;border:1px solid var(--rule);
+  padding:5px 11px;border-radius:980px;cursor:pointer;transition:.16s;white-space:nowrap}
+.who-out:hover{background:#e8e8ed;color:var(--ink)}
+body.dark .who-name{color:#aeaeb2}
+body.dark .who-out{border-color:#38383a;color:#8e8e93}
+body.dark .who-out:hover{background:rgba(255,255,255,.1);color:#f5f5f7}
+@media(max-width:700px){.who-name{display:none}}
+
 /* dark mode when simulator active */
 body.dark .tabs{background:rgba(0,0,0,.85);border-bottom-color:#38383a}
 body.dark .brand{color:#f5f5f7}
@@ -75,12 +85,16 @@ body.dark .spin{border-color:#38383a;border-top-color:#0a84ff}
     <span>고급화학 탐구</span>
   </button>
   <div class="tablist" id="tablist"></div>
+  <div class="whoami" id="whoami"></div>
 </div></div>
 
 <div class="stage" id="stage">
   <div class="load" id="load"><div><div class="spin"></div>불러오는 중…</div></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
 <script>
 const TABS=[
   {id:"home",     label:"홈",        src:"home.html",    dark:false},
@@ -143,7 +157,18 @@ window.addEventListener("message",e=>{
   }
 });
 window.addEventListener("hashchange",fromHash);
-fromHash();
+
+function renderWhoami(me){
+  document.getElementById("whoami").innerHTML=
+    `<span class="who-name">${me.name}${me.isAdmin?" · 관리자":""}</span>
+     <button class="who-out" id="logoutBtn">로그아웃</button>`;
+  document.getElementById("logoutBtn").onclick=()=>AUTH.logout();
+}
+
+LoginGate.inject((me)=>{
+  renderWhoami(me);
+  fromHash();
+});
 </script>
 </body>
 </html>
