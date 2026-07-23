@@ -18,7 +18,7 @@
    없습니다. 민감한 개인정보는 어디에도 입력하지 마세요.
    ============================================================ */
 
-const firebaseConfig = {
+const FIREBASE_CONFIG = {
   apiKey: "AIzaSyA0WhdcbkaUcWnwiX7fpwowSKQ8QjYHnIA",
   authDomain: "chemini-69c3d.firebaseapp.com",
   projectId: "chemini-69c3d",
