@@ -437,6 +437,108 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
   </div>
 </div>
 
+<script>
+(() => {
+  const row = document.getElementById("errorHelpBtn");
+  const panel = document.getElementById("errorHelpPanel");
+  if (!row || !panel) return;
+  row.addEventListener("click", () => {
+    const open = panel.hidden;
+    panel.hidden = !open;
+    row.classList.toggle("open", open);
+  });
+
+  /* ---- 더 헷갈리면 예시로 확인하기 토글 ---- */
+  const row2 = document.getElementById("moreRow");
+  const panel2 = document.getElementById("morePanel");
+  if (row2 && panel2) {
+    row2.addEventListener("click", () => {
+      const open = panel2.hidden;
+      panel2.hidden = !open;
+      row2.classList.toggle("open", open);
+    });
+  }
+
+  /* ---- 숫자 직접 넣어보기 ---- */
+  document.getElementById("tryBtn")?.addEventListener("click", () => {
+    const a = +document.getElementById("tryA").value;
+    const b = +document.getElementById("tryB").value;
+    const out = document.getElementById("tryResult");
+    if (!a || !b) { out.textContent = "A, B 값을 입력하세요."; return; }
+    out.textContent = `A / B = ${(a / b).toFixed(3)}`;
+  });
+
+  /* ---- 확인 퀴즈 ---- */
+  document.querySelectorAll(".quiz-btns button").forEach(b => {
+    b.addEventListener("click", () => {
+      const correct = +b.dataset.a === 1;
+      const out = document.getElementById("quizResult");
+      out.innerHTML = correct
+        ? "✅ 맞아요! 서로 다른 두 측정값의 비율이라 '비율형'입니다."
+        : "❌ 다시 생각해보세요 — 조작 변인 자체가 분모인가요, 서로 독립적인 두 값의 몫인가요?";
+    });
+  });
+
+})();
+</script>
+
+    <div class="sec-b">
+      <label class="flab">측정값 형태</label>
+      <div class="pills" id="errForm"></div>
+      <div class="errgrid" id="errInputs" style="margin-top:12px"></div>
+      <div class="timeresult" id="errResult"></div>
+
+      <!-- 여기부터 붙여넣기 -->
+      <div class="more-row" id="moreRow">
+        더 헷갈리면 예시로 확인하기 <span class="more-arrow">▾</span>
+      </div>
+      <div class="more-panel" id="morePanel" hidden>
+
+        <div class="mp-block">
+          <b>판단 순서 — 내 계산식을 보고 물어보세요</b>
+          <ol>
+            <li>나누기(÷)가 있나요? 없다 → <b>차이형</b> (예: ΔT = T₂ − T₁)</li>
+            <li>있다면, 나누는 분모가 <u>조작 변인 자체</u>인가요? 그렇다 → <b>역수형</b> (예: Δ = hc/λ)</li>
+            <li>아니라면, 서로 <u>다른 두 측정값</u>의 비율인가요? 그렇다 → <b>비율형</b> (예: ε = A/(c·l))</li>
+          </ol>
+        </div>
+
+        <div class="mp-block">
+          <b>숫자로 확인하기</b><br>
+          λ = 500 nm, 오차 ±10 nm라면<br>
+          Δ = hc/λ → λ가 490~510 사이 어디든 될 수 있음<br>
+          → λ가 <b>커지면</b> Δ는 <b>작아진다</b>(반비례) → <b>역수형</b>
+        </div>
+
+        <div class="mp-block mp-warn">
+          <b>❌ 착각하기 쉬운 지점</b><br>
+          "둘 다 나눗셈이니 같은 거 아닌가?" →
+          λ는 <u>조작 변인 자체</u>가 분모라 그래프가 휘고(역수),
+          c·l은 <u>서로 독립적인 두 값</u>의 몫이라 그래프가 직선(비율)입니다.
+        </div>
+
+        <div class="mp-block">
+          <b>🔍 숫자를 직접 넣어보기</b><br>
+          측정값 A <input type="number" id="tryA" value="10" step="0.1">
+          측정값 B <input type="number" id="tryB" value="20" step="0.1">
+          <button class="btn ghost sm" id="tryBtn" type="button">계산</button>
+          <div id="tryResult" style="margin-top:6px;font-weight:600;"></div>
+        </div>
+
+        <div class="mp-block">
+          <b>확인 퀴즈</b> — Kf = [생성물] / [반응물] 은 어떤 형태일까요?
+          <div class="quiz-btns">
+            <button class="btn ghost sm" data-a="2" type="button">① 역수형</button>
+            <button class="btn ghost sm" data-a="1" type="button">② 비율형</button>
+            <button class="btn ghost sm" data-a="0" type="button">③ 차이형</button>
+          </div>
+          <div id="quizResult" style="margin-top:6px;font-weight:600;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 <style>
 .eh-row {
   display: flex !important;
@@ -570,14 +672,14 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 (() => {
   const row = document.getElementById("errorHelpBtn");
   const panel = document.getElementById("errorHelpPanel");
-  if (!row || !panel) return;
-  row.addEventListener("click", () => {
-    const open = panel.hidden;
-    panel.hidden = !open;
-    row.classList.toggle("open", open);
-  });
+  if (row && panel) {
+    row.addEventListener("click", () => {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      row.classList.toggle("open", open);
+    });
+  }
 
-  /* ---- 더 헷갈리면 예시로 확인하기 토글 ---- */
   const row2 = document.getElementById("moreRow");
   const panel2 = document.getElementById("morePanel");
   if (row2 && panel2) {
@@ -588,7 +690,6 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
     });
   }
 
-  /* ---- 숫자 직접 넣어보기 ---- */
   document.getElementById("tryBtn")?.addEventListener("click", () => {
     const a = +document.getElementById("tryA").value;
     const b = +document.getElementById("tryB").value;
@@ -597,7 +698,6 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
     out.textContent = `A / B = ${(a / b).toFixed(3)}`;
   });
 
-  /* ---- 확인 퀴즈 ---- */
   document.querySelectorAll(".quiz-btns button").forEach(b => {
     b.addEventListener("click", () => {
       const correct = +b.dataset.a === 1;
@@ -607,68 +707,8 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
         : "❌ 다시 생각해보세요 — 조작 변인 자체가 분모인가요, 서로 독립적인 두 값의 몫인가요?";
     });
   });
-
 })();
 </script>
-
-    <div class="sec-b">
-      <label class="flab">측정값 형태</label>
-      <div class="pills" id="errForm"></div>
-      <div class="errgrid" id="errInputs" style="margin-top:12px"></div>
-      <div class="timeresult" id="errResult"></div>
-
-      <!-- 여기부터 붙여넣기 -->
-      <div class="more-row" id="moreRow">
-        더 헷갈리면 예시로 확인하기 <span class="more-arrow">▾</span>
-      </div>
-      <div class="more-panel" id="morePanel" hidden>
-
-        <div class="mp-block">
-          <b>판단 순서 — 내 계산식을 보고 물어보세요</b>
-          <ol>
-            <li>나누기(÷)가 있나요? 없다 → <b>차이형</b> (예: ΔT = T₂ − T₁)</li>
-            <li>있다면, 나누는 분모가 <u>조작 변인 자체</u>인가요? 그렇다 → <b>역수형</b> (예: Δ = hc/λ)</li>
-            <li>아니라면, 서로 <u>다른 두 측정값</u>의 비율인가요? 그렇다 → <b>비율형</b> (예: ε = A/(c·l))</li>
-          </ol>
-        </div>
-
-        <div class="mp-block">
-          <b>숫자로 확인하기</b><br>
-          λ = 500 nm, 오차 ±10 nm라면<br>
-          Δ = hc/λ → λ가 490~510 사이 어디든 될 수 있음<br>
-          → λ가 <b>커지면</b> Δ는 <b>작아진다</b>(반비례) → <b>역수형</b>
-        </div>
-
-        <div class="mp-block mp-warn">
-          <b>❌ 착각하기 쉬운 지점</b><br>
-          "둘 다 나눗셈이니 같은 거 아닌가?" →
-          λ는 <u>조작 변인 자체</u>가 분모라 그래프가 휘고(역수),
-          c·l은 <u>서로 독립적인 두 값</u>의 몫이라 그래프가 직선(비율)입니다.
-        </div>
-
-        <div class="mp-block">
-          <b>🔍 숫자를 직접 넣어보기</b><br>
-          측정값 A <input type="number" id="tryA" value="10" step="0.1">
-          측정값 B <input type="number" id="tryB" value="20" step="0.1">
-          <button class="btn ghost sm" id="tryBtn" type="button">계산</button>
-          <div id="tryResult" style="margin-top:6px;font-weight:600;"></div>
-        </div>
-
-        <div class="mp-block">
-          <b>확인 퀴즈</b> — Kf = [생성물] / [반응물] 은 어떤 형태일까요?
-          <div class="quiz-btns">
-            <button class="btn ghost sm" data-a="2" type="button">① 역수형</button>
-            <button class="btn ghost sm" data-a="1" type="button">② 비율형</button>
-            <button class="btn ghost sm" data-a="0" type="button">③ 차이형</button>
-          </div>
-          <div id="quizResult" style="margin-top:6px;font-weight:600;"></div>
-        </div>
-
-      </div>
-      <!-- 여기까지 붙여넣기 -->
-    </div>
-  </div>
-
 
   <div class="sec">
     <div class="sec-h"><b>④ 실험 절차</b><span>구체적으로 실험 계획하기</span></div>
