@@ -143,6 +143,12 @@ const STORE = {
     try { const s = await db.collection("labnotes").doc(teamId).get(); return s.exists ? s.data() : null; }
     catch (e) { return null; }
   },
+  /* 관리자 전용: 기록장만 초기화 (팀 계정·설계는 그대로 둠) */
+  async resetLab(teamId) {
+    if (!FIREBASE_READY) return false;
+    try { await db.collection("labnotes").doc(teamId).delete(); return true; }
+    catch (e) { console.warn("resetLab 실패", e); return false; }
+  },
   /* 현황판: 전체 팀의 설계 데이터를 한 번에 */
   async loadAllDesigns() {
     if (!FIREBASE_READY) return [];
