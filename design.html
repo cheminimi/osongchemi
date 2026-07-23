@@ -409,39 +409,6 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
 
   <div class="sec">
     <div class="sec-h"><b>③ 오차의 영향 확인</b><span>우리가 계획한 조건들이, 측정 오차 때문에 서로 구별이 안 되는 건 아닐까?</span></div>
-<div class="error-help">
-  <button type="button" class="error-help-toggle" id="errorHelpBtn">
-    예시로 이해하기 <span class="chev">▾</span>
-  </button>
-
-  <div class="error-help-panel" id="errorHelpPanel" hidden>
-    <p class="eh-title">예시로 이해하기</p>
-    <p>
-      만약 온도를 조작 변인으로 잡고, 20°C / 22°C / 24°C 세 조건에서
-      반응 속도를 비교하는 실험을 계획했다고 해봅시다.<br>
-      그런데 우리가 쓰는 온도계가 ±3°C 오차를 가진 저렴한 온도계라면 어떨까요?
-    </p>
-    <ul>
-      <li>20°C라고 표시된 게 실제로는 17~23°C 사이 어딘가일 수 있고</li>
-      <li>24°C라고 표시된 것도 실제로는 21~27°C 사이 어딘가일 수 있습니다.</li>
-    </ul>
-    <p>
-      → 이 경우 20°C 조건과 24°C 조건이 <strong>실제로는 겹칠 수도</strong> 있다는 뜻입니다.
-      세 조건을 나눠서 실험해도, "온도 차이 때문에 속도가 달라졌다"고
-      자신 있게 말할 수 없게 됩니다. 오차가 조건 간 차이를 삼켜버린 거예요.
-    </p>
-
-    <p class="eh-title">그래서 미리 물어야 할 질문</p>
-    <ol>
-      <li>우리가 쓰는 측정 기구의 오차(눈금 최소 단위, 제조사 명시 정밀도)는 얼마인가?</li>
-      <li>우리가 나누려는 조건들 사이의 간격이, 그 오차보다 충분히 큰가?</li>
-    </ol>
-    <p class="eh-note">
-      만약 간격이 오차보다 작거나 비슷하다면 → 조건 간격을 더 넓히거나,
-      더 정밀한 기구로 바꾸거나, 반복 측정 횟수를 늘려서 평균의 오차를 줄여야 합니다.
-    </p>
-  </div>
-</div>
     <div class="sec-b">
       <label class="flab">측정값 형태</label>
       <div class="pills" id="errForm"></div>
