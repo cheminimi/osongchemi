@@ -411,12 +411,14 @@ input[type=text]:focus{outline:none;border-color:var(--tint)}
     <div class="sec-h"><b>③ 오차의 영향 확인</b><span>우리가 계획한 조건들이, 측정 오차 때문에 서로 구별이 안 되는 건 아닐까?</span></div>
 
 <div class="sec-b">
-  <label class="flab">예시로 이해하기</label>
-  <label class="ios-toggle-row" id="errorHelpBtn" style="margin-top:8px">
-    <span class="ios-switch">
-      <span class="ios-knob"></span>
-    </span>
-  </label>
+  <div class="eh-row">
+    <label class="flab">예시로 이해하기</label>
+    <label class="ios-toggle-row" id="errorHelpBtn">
+      <span class="ios-switch">
+        <span class="ios-knob"></span>
+      </span>
+    </label>
+  </div>
   <div class="error-help-panel" id="errorHelpPanel" hidden>
     <p>
       만약 온도를 조작 변인으로 잡고, 20°C / 22°C / 24°C 세 조건에서
