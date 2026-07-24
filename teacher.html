@@ -453,8 +453,21 @@ async function renderTeamAccounts(){
    const id=b.dataset.id, name=b.dataset.name;
    if(!confirm(`"${name}" 팀을 완전히 삭제합니다.\n계정·설계·기록장이 모두 사라지며 되돌릴 수 없습니다.\n정말 삭제할까요?`)) return;
    if(!confirm(`마지막 확인입니다. "${name}" 팀을 정말 삭제할까요?`)) return;
-   await AUTH.deleteTeam(id);
+   const orig=b.textContent; b.textContent="삭제 중…"; b.disabled=true;
+   const r = await AUTH.deleteTeam(id);
+   if(!r.team || !r.design || !r.lab){
+     const failed=[!r.team&&"계정",!r.design&&"설계",!r.lab&&"기록장"].filter(Boolean).join(", ");
+     alert(`일부가 삭제되지 않았습니다 (${failed}). 다시 시도해 주세요.`);
+     b.textContent=orig; b.disabled=false;
+   }
    renderTeamAccounts();
+   // 실시간 구독이 반영되기 전이라도 표를 바로 다시 그림 (이중 안전장치)
+   if(typeof STORE!=="undefined"){
+     const docs = await STORE.loadAllDesigns();
+     teams = docsToTeams(docs);
+     renderSimple();
+     analyze();
+   }
  });
 }
 $("createTeamBtn").onclick=async()=>{

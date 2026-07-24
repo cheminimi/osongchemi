@@ -113,9 +113,11 @@ const AUTH = {
     return qs.docs.map(d => ({ id: d.id, ...d.data() }));
   },
   async deleteTeam(teamId) {
-    await db.collection("teams").doc(teamId).delete();
-    await db.collection("designs").doc(teamId).delete().catch(() => {});
-    await db.collection("labnotes").doc(teamId).delete().catch(() => {});
+    const results = { team:true, design:true, lab:true };
+    try { await db.collection("teams").doc(teamId).delete(); } catch(e){ results.team=false; console.warn("팀 계정 삭제 실패", e); }
+    try { await db.collection("designs").doc(teamId).delete(); } catch(e){ results.design=false; console.warn("설계 삭제 실패", e); }
+    try { await db.collection("labnotes").doc(teamId).delete(); } catch(e){ results.lab=false; console.warn("기록장 삭제 실패", e); }
+    return results;
   }
 };
 
