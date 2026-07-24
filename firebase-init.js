@@ -158,6 +158,24 @@ const STORE = {
     catch (e) { console.warn("resetLab 실패", e); return false; }
   },
   /* 현황판: 전체 팀의 설계 데이터를 한 번에 */
+  /* 관리자 전용: 장비 보유 수량 설정 저장·불러오기 */
+  async saveStock(stockObj) {
+    if (!FIREBASE_READY) return false;
+    try { await db.collection("settings").doc("stock").set({ ...stockObj, updatedAt: Date.now() }); return true; }
+    catch (e) { console.warn("saveStock 실패", e); return false; }
+  },
+  async loadStock() {
+    if (!FIREBASE_READY) return null;
+    try { const s = await db.collection("settings").doc("stock").get(); return s.exists ? s.data() : null; }
+    catch (e) { return null; }
+  },
+  /* 실시간 구독: 여러 관리자가 봐도 보유 수량이 항상 최신으로 맞춰짐 */
+  watchStock(callback) {
+    if (!FIREBASE_READY) return () => {};
+    return db.collection("settings").doc("stock").onSnapshot(s => {
+      callback(s.exists ? s.data() : null);
+    }, err => console.warn("watchStock 오류", err));
+  },
   async loadAllDesigns() {
     if (!FIREBASE_READY) return [];
     try {

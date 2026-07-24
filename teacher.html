@@ -392,7 +392,7 @@ function render(A,byTopic,load,pc,cov){
      <span class="track"><span class="fill" style="width:${pct}%"></span><span class="cap" style="left:${n?Math.min(100,cap/Math.max(cap,n)*100):0}%"></span></span>
      <span class="gnum">${n} / ${cap}</span></div>`;
  }).join("");
- document.querySelectorAll(".gear input").forEach(inp=>inp.onchange=()=>{stock[inp.dataset.g]=+inp.value||0;analyze()});
+ document.querySelectorAll(".gear input").forEach(inp=>inp.onchange=()=>{stock[inp.dataset.g]=+inp.value||0;analyze();scheduleStockSave();});
 
  $("pdist").innerHTML=Object.keys(P).map(k=>
   `<div class="pd ${pc[k]===0?"zero":""}"><div class="pk">P${k}</div><div class="pt">${P[k][0]}</div><div class="pn">${pc[k]}</div><small>${P[k][1]}</small></div>`).join("");
@@ -500,8 +500,8 @@ if(typeof LoginGate!=="undefined"){
   $("blank").style.display="none";
 
   if(me.isAdmin){
+   $("teamView").style.display="block";
    $("result").style.display="block";
-   $("teamView").style.display="none";
    renderTeamAccounts();
   } else {
    $("teamView").style.display="block";
@@ -515,8 +515,23 @@ if(typeof LoginGate!=="undefined"){
     renderSimple();
     if(me.isAdmin) analyze();
    });
+   // 장비 보유 수량: 저장된 값이 있으면 불러와 반영, 이후 변경도 실시간으로 동기화
+   STORE.watchStock(saved=>{
+    if(saved){
+     Object.keys(STOCK).forEach(k=>{ if(saved[k]!=null) stock[k]=saved[k]; });
+     document.querySelectorAll(".gear input").forEach(inp=>{ inp.value = stock[inp.dataset.g]; });
+     analyze();
+    }
+   });
   }
  });
+}
+
+let _stockSaveTimer=null;
+function scheduleStockSave(){
+ if(typeof STORE==="undefined") return;
+ clearTimeout(_stockSaveTimer);
+ _stockSaveTimer=setTimeout(()=>{ STORE.saveStock(stock); }, 500);
 }
 </script>
 <script>
