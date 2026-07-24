@@ -369,9 +369,20 @@ function render(A,byTopic,load,pc,cov){
     <td>${t.V[x.v-1]||"?"} · ${M?M[0]:"?"} · <b>${P[x.p][0]}</b><br><em>${P[x.p][1]}</em></td>
     <td><em>${M&&M[1].length?M[1].map(g=>GEAR[g]).join(", "):"—"}</em></td>
     <td>${fl}</td>
-    <td><button class="del" data-i="${i}">×</button></td></tr>`;
+    <td><button class="del" data-team="${x.teamId}" data-name="${esc(x.name)}" title="이 팀의 설계만 삭제 (계정·기록장은 유지)">×</button></td></tr>`;
  }).join("");
- document.querySelectorAll(".del").forEach(b=>b.onclick=()=>{teams.splice(+b.dataset.i,1);analyze()});
+ document.querySelectorAll(".del").forEach(b=>b.onclick=async()=>{
+   const teamId=b.dataset.team, name=b.dataset.name;
+   if(!confirm(`"${name}"의 설계만 삭제합니다.\n팀 계정과 기록장은 그대로 남고, 이 팀은 설계실에서 다시 만들 수 있습니다.\n계속할까요?`)) return;
+   b.disabled=true;
+   const ok = await STORE.deleteDesign(teamId);
+   if(!ok){ alert("삭제에 실패했습니다. 다시 시도해 주세요."); b.disabled=false; return; }
+   // 실시간 구독이 반영되기 전이라도 즉시 다시 불러와 표를 갱신 (이중 안전장치)
+   const docs = await STORE.loadAllDesigns();
+   teams = docsToTeams(docs);
+   renderSimple();
+   analyze();
+ });
 
  $("gears").innerHTML=Object.keys(GEAR).map(k=>{
    const n=load[k],cap=stock[k],pct=Math.min(100,cap?n/Math.max(cap,n)*100:0);

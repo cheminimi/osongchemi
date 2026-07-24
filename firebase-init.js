@@ -135,6 +135,12 @@ const STORE = {
     try { const s = await db.collection("designs").doc(teamId).get(); return s.exists ? s.data() : null; }
     catch (e) { return null; }
   },
+  /* 관리자 전용: 설계만 삭제 (팀 계정·기록장은 그대로 둠 — 팀이 설계실에서 다시 만들 수 있음) */
+  async deleteDesign(teamId) {
+    if (!FIREBASE_READY) return false;
+    try { await db.collection("designs").doc(teamId).delete(); return true; }
+    catch (e) { console.warn("deleteDesign 실패", e); return false; }
+  },
   async saveLab(teamId, data) {
     if (!FIREBASE_READY) return false;
     try { await db.collection("labnotes").doc(teamId).set({ ...data, updatedAt: Date.now() }); return true; }
